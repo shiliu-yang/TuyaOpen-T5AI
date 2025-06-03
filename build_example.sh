@@ -1,28 +1,39 @@
 #!/bin/bash
+# 参数说明：
+# $1 - params path: echo_app_top
+# $2 - user cmd: build / clean / ...
 
 set -e
 cd `dirname $0`
 
-APP_BIN_NAME=$1
-APP_VERSION=$2
-HEADER_DIR=$3
-LIBS_DIR=$4
-LIBS=$5
-OUTPUT_DIR=$6
-USER_CMD=$7
+BUILD_PARAM_DIR=$1
+BUILD_PARAM_FILE=$BUILD_PARAM_DIR/build_param.config
+. $BUILD_PARAM_FILE
+
+APP_BIN_NAME=$CONFIG_PROJECT_NAME
+APP_VERSION=$CONFIG_PROJECT_VERSION
+HEADER_DIR=$OPEN_HEADER_DIR
+LIBS_DIR=$OPEN_LIBS_DIR
+LIBS=$PLATFORM_NEED_LIBS
+OUTPUT_DIR=$BIN_OUTPUT_DIR
+USER_CMD=$2
+BOARD_NAME=$PLATFORM_BOARD
 
 TARGET_PLATFORM=bk7258
 
-echo APP_BIN_NAME=$APP_BIN_NAME
-echo APP_VERSION=$APP_VERSION
-echo USER_CMD=$USER_CMD
-echo LIBS_DIR=$LIBS_DIR
-echo LIBS=$LIBS
-echo OUTPUT_DIR=$OUTPUT_DIR
-echo HEADER_DIR=$HEADER_DIR
-echo TARGET_PLATFORM=$TARGET_PLATFORM
+# echo APP_BIN_NAME=$APP_BIN_NAME
+# echo APP_VERSION=$APP_VERSION
+# echo USER_CMD=$USER_CMD
+# echo LIBS_DIR=$LIBS_DIR
+# echo LIBS=$LIBS
+# echo OUTPUT_DIR=$OUTPUT_DIR
+# echo HEADER_DIR=$HEADER_DIR
+# echo TARGET_PLATFORM=$TARGET_PLATFORM
+# echo BOARD_NAME=$BOARD_NAME
+# exit 0
 
 USER_SW_VER=`echo $APP_VERSION | cut -d'-' -f1`
+TOOLSCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 PYTHON_CMD="python3"
 check_python_install() {
@@ -62,11 +73,41 @@ check_python_install() {
     fi 
 }
 
+MIRROR=0
+
+function get_country_code()
+{
+    if [ -f ${TOOLSCRIPT_DIR}/.mirror ]; then
+        echo "Use existing country code."
+        MIRROR=$(cat ${TOOLSCRIPT_DIR}/.mirror)
+        echo "MIRROR=${MIRROR}"
+    else
+        echo "get_country_code ..."
+        if command -v python3 &>/dev/null; then
+            PYTHON_CMD=python3
+        elif command -v python &>/dev/null && python --version | grep -q '^Python 3'; then
+            PYTHON_CMD=python
+        else
+            echo "Python 3 is not installed."
+            exit 1
+        fi
+
+        MIRROR=$(${PYTHON_CMD} ${TOOLSCRIPT_DIR}/tools/get_conutry.py)
+        echo "country code: ${MIRROR}"
+        if [ x"$MIRROR" = x"1" ]; then
+            echo "enable cn mirror"
+        fi
+
+        echo ${MIRROR} > ${TOOLSCRIPT_DIR}/.mirror
+    fi
+}
+
 enable_python_env() {
     if [ -z $1 ]; then
         echo "Please input virtual environment name."
         exit 1
     fi
+
 
     VIRTUAL_NAME=$1
     SCRIPT_DIR=$PWD/${TARGET_PROJECT}
@@ -82,17 +123,27 @@ enable_python_env() {
 
     ACTIVATE_SCRIPT=${VIRTUAL_ENV}/bin/activate
     PIP_CMD=${VIRTUAL_ENV}/bin/pip3
+    
     if [ -f "$ACTIVATE_SCRIPT" ] && [ -f ${PIP_CMD} ]; then
         echo "Activate python virtual environment."
         . ${ACTIVATE_SCRIPT} || { echo "Failed to activate virtual environment."; exit 1; }
-        ${PIP_CMD} install -r "projects/tuya_app/tuya_scripts/requirements.txt" || { echo "Failed to install required Python packages."; deactivate; exit 1; }
+        echo "country code: ${MIRROR}"
+        if [ x"$MIRROR" = x"1" ]; then
+            ${PIP_CMD} install -r "projects/tuya_app/tuya_scripts/requirements.txt" -i https://mirrors.aliyun.com/pypi/simple || { echo "Failed to install required Python packages."; deactivate; exit 1; }
+        else
+            ${PIP_CMD} install -r "projects/tuya_app/tuya_scripts/requirements.txt" || { echo "Failed to install required Python packages."; deactivate; exit 1; }
+        fi
     else
         echo "Activate script not found."
         rm -rf "${VIRTUAL_ENV}"
         $PYTHON_CMD -m venv "${VIRTUAL_ENV}" || { echo "Failed to create virtual environment."; exit 1; }
         . ${ACTIVATE_SCRIPT} || { echo "Failed to activate virtual environment."; exit 1; }
-        ${PIP_CMD} install -r "projects/tuya_app/tuya_scripts/requirements.txt" || { echo "Failed to install required Python packages."; deactivate; exit 1; }
-
+        echo "country code: ${MIRROR}"
+        if [ x"$MIRROR" = x"1" ]; then
+            ${PIP_CMD} install -r "projects/tuya_app/tuya_scripts/requirements.txt"  -i https://mirrors.aliyun.com/pypi/simple || { echo "Failed to install required Python packages."; deactivate; exit 1; }
+        else
+            ${PIP_CMD} install -r "projects/tuya_app/tuya_scripts/requirements.txt" || { echo "Failed to install required Python packages."; deactivate; exit 1; }
+        fi
     fi
 }
 
@@ -118,7 +169,7 @@ disable_python_env() {
 
 check_python_install ||  { echo "Failed to check python environment."; exit 1; }
 
-bash t5_os/toolchain_get.sh $(pwd)/../tools || { echo "Failed to setup toolchain."; exit 1; } 
+bash toolchain_get.sh $(pwd)/../tools || { echo "Failed to setup toolchain."; exit 1; } 
 
 
 export TUYA_APP_PATH=$APP_PATH
@@ -135,6 +186,8 @@ cd t5_os
 
 TARGET_PROJECT=projects/tuya_app
 
+get_country_code
+
 enable_python_env "tuya_build_env" || { echo "Failed to enable python virtual environment."; exit 1; }
 
 tmp_gen_files_list=bk_idk/tools/build_tools/part_table_tools/config/gen_files_list.txt
@@ -143,7 +196,7 @@ if [ -f $tmp_gen_files_list ]; then
 fi
 touch $tmp_gen_files_list
 
-TOP_DIR=$(pwd)
+TOP_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 if [ -f ${TOP_DIR}/.app ]; then
     OLD_APP_BIN_NAME=$(cat ${TOP_DIR}/.app)
     echo OLD_APP_BIN_NAME: ${OLD_APP_BIN_NAME}
