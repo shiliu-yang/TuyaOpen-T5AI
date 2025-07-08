@@ -332,6 +332,8 @@ bk_err_t bk_gpio_register_isr(gpio_id_t gpio_id, gpio_isr_t isr)
 bk_err_t bk_gpio_enable_interrupt(gpio_id_t gpio_id)
 {
 	GPIO_RETURN_ON_INVALID_ID(gpio_id);
+	//Before enable the interrupt,wait for the internal stability of the chip
+	for (volatile int i = 0; i < 1000; i++);    
 
 	return gpio_hal_enable_interrupt(&s_gpio.hal, gpio_id);
 }
@@ -441,11 +443,12 @@ bk_err_t bk_gpio_ctrl_external_ldo(gpio_ctrl_ldo_module_e module,gpio_id_t gpio_
                 // Modified by TUYA Start
 #if CONFIG_TUYA_LOGIC_MODIFY
                 else {
-                    uint8_t usb_ldo = 56, dvp_ldo = 56;
-                    uint8_t dvp_active_level = 0, usb_active_level = 0;
+                    uint8_t usb_ldo = 56, dvp_ldo = 56, lcd_ldo = 56;
+                    uint8_t lcd_active_level = 0, dvp_active_level = 0, usb_active_level = 0;
                     tkl_vi_get_power_info(UVC_CAMERA, &usb_ldo, &usb_active_level);
                     tkl_vi_get_power_info(DVP_CAMERA, &dvp_ldo, &dvp_active_level);
-                    if ((gpio_id == usb_ldo) || (gpio_id == dvp_ldo)) {
+                    tkl_display_power_ctrl_pin(&lcd_ldo, &lcd_active_level);
+                    if ((gpio_id == lcd_ldo) || (gpio_id == usb_ldo) || (gpio_id == dvp_ldo)) {
                         /*gpio dev unmap*/
                         BK_LOG_ON_ERR(bk_gpio_disable_output(gpio_id));
                         BK_LOG_ON_ERR(bk_gpio_disable_input(gpio_id));
@@ -457,7 +460,12 @@ bk_err_t bk_gpio_ctrl_external_ldo(gpio_ctrl_ldo_module_e module,gpio_id_t gpio_
                         BK_LOG_ON_ERR(bk_gpio_disable_input(gpio_id));
                         BK_LOG_ON_ERR(bk_gpio_enable_output(gpio_id));
 
-						if (gpio_id == usb_ldo) {
+                        if (gpio_id == lcd_ldo) {
+                            if (lcd_active_level)
+                                BK_LOG_ON_ERR(bk_gpio_set_output_high(gpio_id));
+                            else
+                                BK_LOG_ON_ERR(bk_gpio_set_output_low(gpio_id));
+                        } else if (gpio_id == usb_ldo) {
                             if (usb_active_level)
                                 BK_LOG_ON_ERR(bk_gpio_set_output_high(gpio_id));
                             else
@@ -497,11 +505,12 @@ bk_err_t bk_gpio_ctrl_external_ldo(gpio_ctrl_ldo_module_e module,gpio_id_t gpio_
                     // Modified by TUYA Start
 #if CONFIG_TUYA_LOGIC_MODIFY
                     else {
-                        uint8_t usb_ldo = 56, dvp_ldo = 56;
-                        uint8_t dvp_active_level = 0, usb_active_level = 0;
+                        uint8_t usb_ldo = 56, dvp_ldo = 56, lcd_ldo = 56;
+                        uint8_t lcd_active_level = 0, dvp_active_level = 0, usb_active_level = 0;
                         tkl_vi_get_power_info(UVC_CAMERA, &usb_ldo, &usb_active_level);
                         tkl_vi_get_power_info(DVP_CAMERA, &dvp_ldo, &dvp_active_level);
-                        if ((gpio_id == usb_ldo) || (gpio_id == dvp_ldo)) {
+                        tkl_display_power_ctrl_pin(&lcd_ldo, &lcd_active_level);
+                        if ((gpio_id == lcd_ldo) || (gpio_id == usb_ldo) || (gpio_id == dvp_ldo)) {
                             /*gpio dev unmap*/
                             BK_LOG_ON_ERR(bk_gpio_disable_output(gpio_id));
                             BK_LOG_ON_ERR(bk_gpio_disable_input(gpio_id));
@@ -513,7 +522,12 @@ bk_err_t bk_gpio_ctrl_external_ldo(gpio_ctrl_ldo_module_e module,gpio_id_t gpio_
                             BK_LOG_ON_ERR(bk_gpio_disable_input(gpio_id));
                             BK_LOG_ON_ERR(bk_gpio_enable_output(gpio_id));
 
-							if (gpio_id == usb_ldo) {
+                            if (gpio_id == lcd_ldo) {
+                                if (lcd_active_level)
+                                    BK_LOG_ON_ERR(bk_gpio_set_output_low(gpio_id));
+                                else
+                                    BK_LOG_ON_ERR(bk_gpio_set_output_high(gpio_id));
+                            } else if (gpio_id == usb_ldo) {
                                 if (usb_active_level)
                                     BK_LOG_ON_ERR(bk_gpio_set_output_low(gpio_id));
                                 else
@@ -698,7 +712,9 @@ static void gpio_config_wakeup_function(void)
 		if(s_gpio_dynamic_wakeup_source_map[i].id != GPIO_WAKE_SOURCE_IDLE_ID) {
 			//maybe the PIN is re-used as SECOND_FUNCTION and GPIO,F.E:UART RXD re-uses as wakeup PIN
 			gpio_hal_func_unmap(hal, s_gpio_dynamic_wakeup_source_map[i].id);
-			gpio_wakeup_set_pin_voltage_status(s_gpio_dynamic_wakeup_source_map[i].id, s_gpio_dynamic_wakeup_source_map[i].int_type);
+			// Modified by TUYA Start
+			//gpio_wakeup_set_pin_voltage_status(s_gpio_dynamic_wakeup_source_map[i].id, s_gpio_dynamic_wakeup_source_map[i].int_type);
+			// Modified by TUYA End
 			bk_gpio_set_interrupt_type(s_gpio_dynamic_wakeup_source_map[i].id, s_gpio_dynamic_wakeup_source_map[i].int_type);
 			//bk_gpio_enable_interrupt(s_gpio_dynamic_wakeup_source_map[i].id);
 			wakeup_id |= (uint64_t)0x1<<s_gpio_dynamic_wakeup_source_map[i].id;

@@ -151,10 +151,6 @@ static void lv_tast_entry(void *arg)
         #endif
 
         rtos_delay_milliseconds(sleep_time);
-        // Modified by TUYA Start
-        extern void tuya_app_gui_feed_watchdog(void);
-        tuya_app_gui_feed_watchdog();
-        // Modified by TUYA End
     }
 
     rtos_set_semaphore(&lvgl_sem);
@@ -233,21 +229,3 @@ int lv_vendor_draw_buffer_cnt(void)
     }
 }
 
-// Modified by TUYA Start
-void __attribute__((weak)) tuya_app_gui_feed_watchdog(void)
-{
-
-}
-
-void __attribute__((weak)) lvMsgHandle(void)
-{
-}
-
-void __attribute__((weak)) lvMsgEventReg(lv_obj_t *obj, lv_event_code_t eventCode)
-{
-}
-
-void __attribute__((weak)) lvMsgEventDel(lv_obj_t *obj)
-{
-}
-// Modified by TUYA End

@@ -257,8 +257,8 @@ void boot_show_version(void)
 
 	ret = bk_flash_read_bytes(BOOT_VERSION_OFFSET, bootloader_version, 4);
 	if (0 == ret) {
-		BOOT_LOG_FORCE("bl2 %d.%d.%d", bootloader_version[0], bootloader_version[1], (bootloader_version[2] | (bootloader_version[3] << 8)));
+		BOOT_LOG_FORCE("bl2 version %d.%d.%d.%d", bootloader_version[3], bootloader_version[2], bootloader_version[1], bootloader_version[0]);
 	} else {
-		BOOT_LOG_FORCE("bl2 unknown");
+		BOOT_LOG_FORCE("bl2 version unknown");
 	}
 }

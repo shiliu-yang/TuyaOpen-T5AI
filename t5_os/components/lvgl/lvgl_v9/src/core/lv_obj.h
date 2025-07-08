@@ -229,9 +229,6 @@ struct _lv_obj_t {
 #if LV_USE_OBJ_ID
     void * id;
 #endif
-    // Modified by TUYA Start
-    void * obj_tag;         //对象标签
-    // Modified by TUYA Start
     lv_area_t coords;
     lv_obj_flag_t flags;
     lv_state_t state;
@@ -316,13 +313,6 @@ static inline void lv_obj_set_user_data(lv_obj_t * obj, void * user_data)
     obj->user_data = user_data;
 }
 
-// Modified by TUYA Start
-static inline void lv_obj_set_tag(lv_obj_t * obj, void * obj_tag)
-{
-    obj->obj_tag = obj_tag;
-}
-// Modified by TUYA End
-
 /*=======================
  * Getter functions
  *======================*/
@@ -374,13 +364,6 @@ static inline void * lv_obj_get_user_data(lv_obj_t * obj)
 {
     return obj->user_data;
 }
-
-// Modified by TUYA Start
-static inline void * lv_obj_get_tag(lv_obj_t * obj)
-{
-    return obj->obj_tag;
-}
-// Modified by TUYA End
 
 /*=======================
  * Other functions

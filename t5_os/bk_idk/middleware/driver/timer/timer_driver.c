@@ -640,6 +640,20 @@ __IRAM_SEC void bk_timer_delay_us(uint32_t us)
 #endif
 
 // Modified by TUYA Start
+bk_err_t bk_timer_set_period_us(timer_id_t timer_id, uint64_t time_us)
+{
+    TIMER_RETURN_ON_NOT_INIT();
+    TIMER_RETURN_ON_INVALID_ID(timer_id);
+    TIMER_PM_CHECK_RESTORE(timer_id);
+#if CONFIG_TIMER_SUPPORT_ID_BITS
+    TIMER_RETURN_TIMER_ID_IS_ERR(timer_id);
+#endif
+    timer_hal_set_period_us(&s_timer.hal, timer_id, time_us);
+
+    return BK_OK;
+}
+// Modified by TUYA End
+
 bk_err_t bk_timer_start_us(timer_id_t timer_id, uint64_t time_us, timer_isr_t callback)
 {
     TIMER_RETURN_ON_NOT_INIT();
@@ -651,11 +665,13 @@ bk_err_t bk_timer_start_us(timer_id_t timer_id, uint64_t time_us, timer_isr_t ca
 
     uint32_t en_status = 0;
 
-#if CONFIG_TIMER_US
-    if (timer_id == TIMER_ID0) {
-        TIMER_LOGE("timer0 is reserved for us timer!\r\n");
-    }
-#endif
+// Modified by TUYA Start
+// #if CONFIG_TIMER_US
+//     if (timer_id == TIMER_ID0) {
+//         TIMER_LOGE("timer0 is reserved for us timer!\r\n");
+//     }
+// #endif
+// Modified by TUYA End
 
     timer_chan_init_common(timer_id);
 #if !CONFIG_RTC_TIMER_PRECISION_TEST
@@ -679,5 +695,3 @@ bk_err_t bk_timer_start_us(timer_id_t timer_id, uint64_t time_us, timer_isr_t ca
 
     return BK_OK;
 }
-// Modified by TUYA End
-

@@ -92,6 +92,7 @@ typedef struct {
 	void *(*_pbuf_coalesce)(void *p);
 	int (*_get_rx_pbuf_type)(void);
 	int (*_get_pbuf_pool_size)(void);
+	bool (*_pbuf_check_overflow)(void *p, uint32_t buf);
 	void *(*_get_netif_hostname)(void *netif);
 	int (*_save_net_info)(int item, u8 *ptr0, u8 *ptr1, u8 *ptr2);
 	int (*_get_net_info)(int item, u8 *ptr0, u8 *ptr1, u8 *ptr2);
@@ -138,6 +139,8 @@ typedef struct {
 	bk_err_t (*_bk_pm_sleep_register)(void *config_cb);
 	bk_err_t (*_bk_pm_low_voltage_register)(void *config_cb);
 	void (* _wifi_vote_rf_ctrl)(uint8_t cmd);
+	void (* _wifi_phy_clk_open)(uint8_t is_wifi);
+	void (* _wifi_phy_clk_close)(uint8_t is_wifi);
 	void (*_wifi_mac_phy_power_on)(void);
 	void (*_mac_ps_exc32_cb_notify)(void);
 	void (*_mac_ps_exc32_init)(void *cb);
@@ -147,6 +150,7 @@ typedef struct {
 	void (*_rwnx_cal_mac_sleep_rc_clr)(void);
 	void (*_rwnx_cal_mac_sleep_rc_recover)(void);
 	bk_err_t (*_bk_rosc_32k_get_ppm)(void);
+	double (*_bk_rosc_32k_get_freq)(void);
 	INT64 (*_bk_rosc_32k_get_time_diff)(void);
 	void (*_mac_printf_encode)(char *txt, size_t maxlen, const u8 *data, size_t len);
 	void (*_dbg_enable_debug_gpio)(void);

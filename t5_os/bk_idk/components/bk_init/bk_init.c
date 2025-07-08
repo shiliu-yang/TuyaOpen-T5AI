@@ -425,5 +425,15 @@ extern int mp_do_startup(int heap_len);
 #if (CONFIG_PSRAM)
 	bk_psram_id_auto_detect();
 #endif
+#if CONFIG_CP1_POWER_ON_WHEN_LV
+	#if CONFIG_SYS_CPU0
+		bk_pm_module_vote_boot_cp1_ctrl(PM_BOOT_CP1_MODULE_NAME_APP,PM_POWER_MODULE_STATE_ON);//open the cp1;
+	#endif
+#endif
+
+#if (CONFIG_USB_CDC)
+	extern bk_err_t bk_cdc_acm_startup(void);
+	bk_cdc_acm_startup();
+#endif
 	return 0;
 }

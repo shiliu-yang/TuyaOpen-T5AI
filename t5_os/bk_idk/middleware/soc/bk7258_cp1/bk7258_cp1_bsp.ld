@@ -231,8 +231,25 @@ SECTIONS
         *(".data.*")
         *(.sdata)
 
+	/* Modified by TUYA Start */
+        *(*ts2.data)
+        *(*ts2.data.*)
+        *(*ts2.sdata)
+	/* Modified by TUYA End */
+
         *(.gnu.linkonce.d*)
         . = ALIGN(4);
+
+	/* Modified by TUYA Start */
+        __data_lcd_start__ = .;
+        *(*ty_lcd.data)
+        *(*ty_lcd.data.*)
+        *(*ty_lcd.sdata)
+
+        . = ALIGN(4);
+        __data_lcd_end__ = .;
+	/* Modified by TUYA End */
+
         __data_end__ = .;
     } > RAM AT > FLASH
 
@@ -268,6 +285,14 @@ SECTIONS
         *(.bss)
         *(.bss*)
         *(COMMON)
+
+	/* Modified by TUYA Start */
+        *(*ts2.bss)
+        *(*ts2.bss.*)
+        *(*ty_lcd.bss)
+        *(*ty_lcd.bss.*)
+	/* Modified by TUYA End */
+
         . = ALIGN(4);
         _bss_end = .;
     } > RAM

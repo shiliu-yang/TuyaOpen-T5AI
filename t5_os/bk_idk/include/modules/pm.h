@@ -76,6 +76,8 @@ extern "C" {
 /*----SUB POWER DOMAIN PHY--------*/
 #define PM_POWER_SUB_MODULE_NAME_PHY_BT                (POWER_SUB_MODULE_NAME_PHY_BT)
 #define PM_POWER_SUB_MODULE_NAME_PHY_WIFI              (POWER_SUB_MODULE_NAME_PHY_WIFI)
+#define PM_POWER_SUB_MODULE_NAME_PHY_RF                (POWER_SUB_MODULE_NAME_PHY_RF)
+
 /*----SUB POWER DOMAIN AHB--------*/
 #define PM_POWER_SUB_MODULE_NAME_AHBP_CAN              (POWER_SUB_MODULE_NAME_AHBP_CAN)
 #define PM_POWER_SUB_MODULE_NAME_AHBP_QSPI             (POWER_SUB_MODULE_NAME_AHBP_QSPI)
@@ -202,7 +204,8 @@ typedef enum
 	PM_SLEEP_MODULE_NAME_TIMER_3,  // 28
 	PM_SLEEP_MODULE_NAME_APP1,     // 29
 	PM_SLEEP_MODULE_NAME_CPU1,     // 30
-	PM_SLEEP_MODULE_NAME_APP3,     // 31
+	PM_SLEEP_MODULE_NAME_ROSC_PROG,// 31
+	PM_SLEEP_MODULE_NAME_ROSC,     // 32
 	/*Attention: if you add vote ,the following[ #define PM_ENTER_LOW_VOL_MODULES_CONFIG] also need add the vote*/
 	PM_SLEEP_MODULE_NAME_MAX
 }pm_sleep_module_name_e;
@@ -308,10 +311,11 @@ typedef enum
 	PM_DEV_ID_TRNG,     // 36
 	PM_DEV_ID_SECURE_WORLD,  // 37
 	PM_DEV_ID_UART4,    // 38
+	PM_DEV_ID_CPU1,     // 39
 
-	PM_DEV_ID_DEFAULT,  // 39  it is used by pm module set default cpu frequency
+	PM_DEV_ID_DEFAULT,  // 40  it is used by pm module set default cpu frequency
 
-	PM_DEV_ID_MAX
+	PM_DEV_ID_MAX       //attention:max 63
 }pm_dev_id_e;
 typedef enum
 {
@@ -418,7 +422,8 @@ typedef enum
 	PM_SLEEP_MODULE_NAME_TIMER_3,\
 	PM_SLEEP_MODULE_NAME_APP1,\
 	PM_SLEEP_MODULE_NAME_CPU1,\
-	PM_SLEEP_MODULE_NAME_APP3,\
+	PM_SLEEP_MODULE_NAME_ROSC_PROG,\
+	PM_SLEEP_MODULE_NAME_ROSC,\
 }
 
 /*enter deep sleep ,require sleep module config*/
@@ -779,6 +784,21 @@ bk_err_t bk_pm_light_sleep_register_cb(pm_cb_conf_t *enter_config, pm_cb_conf_t 
  */
 bk_err_t bk_pm_light_sleep_unregister_cb(bool enter_cb, bool exit_cb);
 /**
+ * @brief get sleep state of module
+ *
+ * get current sleep state of pm sleep module.
+ *
+ * @attention
+ * - This API is used to get the sleep state
+ *
+ * @param
+ * - module: module name
+ *
+ * @return
+ * - sleep state: 0x0:active;0x1:sleeped;
+ */
+int32_t bk_pm_module_sleep_state_get(pm_sleep_module_name_e module);
+/**
  * @brief get power domain of module state
  *
  * get the power domain state
@@ -792,7 +812,7 @@ bk_err_t bk_pm_light_sleep_unregister_cb(bool enter_cb, bool exit_cb);
  *  -the state of power domain state
  *
  */
-int32 bk_pm_module_power_state_get(pm_power_module_name_e module);
+int32_t bk_pm_module_power_state_get(pm_power_module_name_e module);
 /**
  * @brief get the cpu frequency of the module vote
  *

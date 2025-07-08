@@ -57,10 +57,14 @@ if(CONFIG_LVGL)
 			lvgl_v8/src/extra/widgets/calendar/lv_calendar_header_dropdown.c
 			lvgl_v8/src/extra/widgets/chart/lv_chart.c
 			lvgl_v8/src/extra/widgets/colorwheel/lv_colorwheel.c
+			# Modified by TUYA Start
 			lvgl_v8/src/extra/widgets/dclock/lv_dclock.c
 			lvgl_v8/src/extra/widgets/radiobtn/lv_radiobtn.c
 			lvgl_v8/src/extra/widgets/textprogress/lv_textprogress.c
 			lvgl_v8/src/extra/widgets/carousel/lv_carousel.c
+			#lvgl_v8/src/extra/libs/fsdrv/lv_fs_littlefs.c
+			lvgl_v8/src/extra/libs/fsdrv/lv_fs_tuya.c
+			# Modified by TUYA End
 			lvgl_v8/src/extra/widgets/imgbtn/lv_imgbtn.c
 			lvgl_v8/src/extra/widgets/keyboard/lv_keyboard.c
 			lvgl_v8/src/extra/widgets/led/lv_led.c
@@ -88,8 +92,6 @@ if(CONFIG_LVGL)
 			lvgl_v8/src/extra/libs/fsdrv/lv_fs_fatfs.c
 			lvgl_v8/src/extra/libs/fsdrv/lv_fs_posix.c
 			lvgl_v8/src/extra/libs/fsdrv/lv_fs_stdio.c
-			#lvgl_v8/src/extra/libs/fsdrv/lv_fs_littlefs.c
-			lvgl_v8/src/extra/libs/fsdrv/lv_fs_tuya.c
 			# lvgl_v8/src/extra/libs/fsdrv/lv_fs_win32.c
 			lvgl_v8/src/extra/libs/gif/gifdec.c
 			lvgl_v8/src/extra/libs/gif/lv_gif.c
@@ -407,7 +409,7 @@ endif()
 # Modified by TUYA Start
 armino_component_register(SRCS "${srcs}"
 		INCLUDE_DIRS "${incs}"
-		PRIV_REQUIRES include bk_vfs littlefs fatfs multimedia freetype display_service
+		PRIV_REQUIRES include bk_vfs fatfs multimedia display_service littlefs freetype
 	)
 # Modified by TUYA End
 

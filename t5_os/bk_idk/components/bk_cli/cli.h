@@ -69,8 +69,11 @@ int cli_ble_init(void);
 int cli_netif_init(void);
 int cli_misc_init(void);
 int cli_mem_init(void);
+int cli_fpb_init(void);
+int cli_dwt_init(void);
 int cli_airkiss_init(void);
 int cli_phy_init(void);
+
 #if CONFIG_LWIP
 int cli_lwip_init(void);
 #endif
@@ -171,6 +174,9 @@ int cli_reset_reason_init(void);
 int cli_jpeg_sw_enc_init(void);
 int cli_psa_crypto_init(void);
 int cli_psa_customization_init();
+#if (CONFIG_BK_MODEM)
+int cli_modem_init(void);
+#endif
 
 extern int hexstr2bin_cli(const char *hex, u8 *buf, size_t len);
 extern int hexstr2bin(const char *hex, u8 *buf, size_t len);

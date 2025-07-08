@@ -70,6 +70,7 @@ if (CONFIG_SPIDMA)
 		)
 endif()
 
+# Modified by TUYA Start
 # if (CONFIG_SYS_CPU0)
 # 	list(APPEND srcs
 # 		"video_transfer/video_transfer.c"
@@ -83,6 +84,7 @@ endif()
 # 			)
 # 	endif()
 # endif()
+# Modified by TUYA End
 
 endif() #CONFIG_SOC_BK7258
 

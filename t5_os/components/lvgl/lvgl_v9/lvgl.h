@@ -79,13 +79,6 @@ extern "C" {
 #include "src/widgets/textarea/lv_textarea.h"
 #include "src/widgets/tileview/lv_tileview.h"
 #include "src/widgets/win/lv_win.h"
-// Modified by TUYA Start
-#include "src/widgets/dclock/lv_dclock.h"
-#include "src/widgets/radiobtn/lv_radiobtn.h"
-#include "src/widgets/textprogress/lv_textprogress.h"
-#include "src/widgets/carousel/lv_carousel.h"
-// Modified by TUYA End
-
 
 #include "src/others/snapshot/lv_snapshot.h"
 #include "src/others/sysmon/lv_sysmon.h"

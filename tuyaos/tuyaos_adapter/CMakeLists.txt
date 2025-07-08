@@ -19,6 +19,7 @@ set(incs
     "include"
     "include/adc"
     "include/bluetooth"
+    "include/cellular"
     "include/flash"
     "include/gpio"
     "include/hci"
@@ -48,6 +49,7 @@ set(incs
     "include/rgb"
     "include/qspi"
     "include/mcu8080"
+    "../../t5_os/bk_idk/components/bk_modem/include"
 )
 
 string(REPLACE " " ";" TUYA_HEADER_DIR_LIST $ENV{TUYA_HEADER_DIR})
@@ -72,6 +74,7 @@ endif()
 
 if (CONFIG_SYS_CPU1)
     list(APPEND srcs
+        src/driver/tkl_cellular.c
         src/driver/tkl_lwip_1.c
         src/driver/tkl_wifi_1.c
         src/driver/tkl_hci_1.c

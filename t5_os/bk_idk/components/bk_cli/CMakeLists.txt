@@ -30,6 +30,13 @@ list(APPEND srcs
 	cli_exception.c
 	)
 
+if (CONFIG_SOC_BK7236XX)
+	list(APPEND srcs
+    	cli_fpb.c
+    	cli_dwt.c
+	)
+endif()
+
 if (CONFIG_BUTTON OR CONFIG_ADC_KEY)
 	list(APPEND srcs
 		cli_key.c
@@ -144,11 +151,13 @@ if (CONFIG_LWIP)
 	)
 endif()
 
+# Modified by TUYA Start
 # if (CONFIG_BK_NETIF)
 # 	list(APPEND srcs
 # 		cli_netif.c
 # 	)
 # endif()
+# Modified by TUYA End
 
 if ((CONFIG_CPU_CNT GREATER 1))
 	list(APPEND srcs
@@ -394,6 +403,10 @@ if (CONFIG_SCR)
 	list(APPEND srcs cli_scr.c)
 endif()
 
+if (CONFIG_BK_MODEM)
+	list(APPEND srcs cli_modem.c)
+endif()
+
 if (CONFIG_JPEG_SW_ENCODER_TEST)
 	list(APPEND srcs cli_jpeg_sw_enc.c)
 endif()
@@ -401,7 +414,7 @@ set(PRIV_REQUIRES_LIST bk_common mbedtls bk_netif bk_ps fatfs bk_vfs bk_init bk_
 
 armino_component_register(SRCS "${srcs}"
 	INCLUDE_DIRS "${incs}"
-	REQUIRES utf8 temp_detect app driver user_driver bk_system iperf fatfs user_driver http adc_key key tfm
+	REQUIRES utf8 temp_detect app driver user_driver bk_system iperf fatfs user_driver http adc_key key tfm cm33
 	#PRIV_REQUIRES airkiss bk_common bk_netif bk_ps
 	PRIV_REQUIRES ${PRIV_REQUIRES_LIST}
 	)

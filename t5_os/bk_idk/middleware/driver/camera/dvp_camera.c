@@ -1017,6 +1017,7 @@ static void dvp_camera_reset_hardware_modules_handler(dvp_driver_handle_t *handl
 	//if (handle->node_init == false)
 	{
 		bk_yuv_buf_soft_reset();
+        handle->yuv_line_index = 0; // Modified by TUYA
 	}
 
 	if (handle->dma_channel < DMA_ID_MAX)
@@ -1840,6 +1841,7 @@ static void dvp_camera_register_isr_function(dvp_driver_handle_t *handle)
 // Modified by TUYA End
 const dvp_sensor_config_t *bk_dvp_camera_enumerate(void)
 {
+	i2c_config_t i2c_config = {0};
 	const dvp_sensor_config_t *sensor = NULL;
 
 	// step 1: power on video modules
@@ -1860,16 +1862,14 @@ const dvp_sensor_config_t *bk_dvp_camera_enumerate(void)
 	// step 3: enable mclk for i2c communicate with dvp
 	bk_video_dvp_mclk_enable(YUV_MODE);
 
-    // Modified by TUYA Start
-#if CONFIG_TUYA_LOGIC_MODIFY
-    // do nothing
-#else
-	i2c_config_t i2c_config = {0};
-
 	// step 4: init i2c
 	i2c_config.baud_rate = I2C_BAUD_RATE_100KHZ;
 	i2c_config.addr_mode = I2C_ADDR_MODE_7BIT;
 
+    // Modified by TUYA Start
+#if CONFIG_TUYA_LOGIC_MODIFY
+    // do nothing
+#else
 	bk_i2c_init(CONFIG_DVP_CAMERA_I2C_ID, &i2c_config);
 #endif
     // Modified by TUYA End

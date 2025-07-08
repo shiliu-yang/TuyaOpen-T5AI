@@ -81,10 +81,15 @@ static uint32_t sys_drv_module_power_state_get_ptr(unsigned int module)
 	return sys_drv_module_power_state_get(module);
 }
 
-static void phy_wakeup_reinit_ptr(void)
+static void phy_wakeup_reinit_ptr(uint8 is_wifi)
 {
-	 extern void phy_wakeup_reinit();
-	 phy_wakeup_reinit();
+	 extern void phy_wakeup_reinit(uint8 is_wifi);
+	 phy_wakeup_reinit(is_wifi);
+}
+
+bk_err_t bk_pm_module_vote_power_ctrl_ptr(unsigned int module, uint32_t power_state)
+{
+	return bk_pm_module_vote_power_ctrl((pm_power_module_name_e)module, (pm_power_module_state_e)power_state);
 }
 
 const rf_control_funcs_t g_rf_control_funcs = {
@@ -100,12 +105,14 @@ const rf_control_funcs_t g_rf_control_funcs = {
     ._sys_drv_set_ana_reg12_dpfms = sys_drv_set_ana_reg12_dpfms_ptr,
     ._sys_drv_module_power_state_get_ptr = sys_drv_module_power_state_get_ptr,
     ._phy_wakeup_reinit_ptr = phy_wakeup_reinit_ptr,
+    ._bk_pm_module_vote_power_ctrl = bk_pm_module_vote_power_ctrl_ptr,
 };
 
 const rf_variable_t g_rf_variable = {
     ._pm_power_module_state_off = PM_POWER_MODULE_STATE_OFF,
     ._pm_power_module_state_on = PM_POWER_MODULE_STATE_ON,
     ._pm_power_module_name_phy = PM_POWER_MODULE_NAME_PHY,
+    ._pm_power_module_name_rf = PM_POWER_SUB_MODULE_NAME_PHY_RF,
 };
 
 void bk_rf_adapter_init(void)

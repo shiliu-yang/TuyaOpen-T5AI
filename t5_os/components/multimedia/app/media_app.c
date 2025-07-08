@@ -72,7 +72,7 @@ static jpeg_decode_pipeline_param_t jpeg_decode_pipeline_param = {0};
 #if CONFIG_TUYA_LOGIC_MODIFY
 #include "tkl_mutex.h"
 static TKL_MUTEX_HANDLE media_mutex = NULL;
-static bk_err_t tuya_single_core_send_media_msg(uint32_t event, uint32_t param)
+static bk_err_t tuya_single_core_send_media_msg(uint32_t event, void *param)
 {
     int ret = 0;
 
@@ -93,7 +93,7 @@ static bk_err_t tuya_single_core_send_media_msg(uint32_t event, uint32_t param)
     msg.param = (uint32_t)&mb_msg;
     msg.event = event;
     mb_msg.event = event;
-    mb_msg.param = param;
+    mb_msg.param = (uint32_t)param;
     media_send_msg(&msg);
 
     tkl_mutex_unlock(media_mutex);

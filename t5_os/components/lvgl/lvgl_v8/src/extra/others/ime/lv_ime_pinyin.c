@@ -29,7 +29,9 @@ static void lv_ime_pinyin_style_change_event(lv_event_t * e);
 static void lv_ime_pinyin_kb_event(lv_event_t * e);
 static void lv_ime_pinyin_cand_panel_event(lv_event_t * e);
 
-static void init_pinyin_dict(lv_obj_t * obj, lv_pinyin_dict_t * dict);
+// Modified by TUYA Start
+static void init_pinyin_dict(lv_obj_t * obj, const lv_pinyin_dict_t * dict);
+// Modified by TUYA End
 static void pinyin_input_proc(lv_obj_t * obj);
 static void pinyin_page_proc(lv_obj_t * obj, uint16_t btn);
 static char * pinyin_search_matching(lv_obj_t * obj, char * py_str, uint16_t * cand_num);
@@ -72,7 +74,9 @@ static char   lv_pinyin_cand_str[LV_IME_PINYIN_CAND_TEXT_NUM][4];
 static char * lv_btnm_def_pinyin_sel_map[LV_IME_PINYIN_CAND_TEXT_NUM + 3];
 
 #if LV_IME_PINYIN_USE_DEFAULT_DICT
-lv_pinyin_dict_t lv_ime_pinyin_def_dict[] = {
+// Modified by TUYA Start
+static const lv_pinyin_dict_t lv_ime_pinyin_def_dict[] = {
+// Modified by TUYA End
     { "a", "啊" },
     { "ai", "愛" },
     { "an", "安暗案" },
@@ -511,7 +515,9 @@ lv_obj_t * lv_ime_pinyin_get_cand_panel(lv_obj_t * obj)
  * @param obj  pointer to a Pinyin input method object
  * @return     pointer to the Pinyin input method dictionary
  */
-lv_pinyin_dict_t * lv_ime_pinyin_get_dict(lv_obj_t * obj)
+// Modified by TUYA Start
+const lv_pinyin_dict_t * lv_ime_pinyin_get_dict(lv_obj_t * obj)
+// Modified by TUYA End
 {
     LV_ASSERT_OBJ(obj, MY_CLASS);
 
@@ -570,12 +576,17 @@ static void lv_ime_pinyin_constructor(const lv_obj_class_t * class_p, lv_obj_t *
 #endif
 
     /* Init pinyin_ime->cand_panel */
-    pinyin_ime->cand_panel = lv_btnmatrix_create(lv_scr_act());
+// Modified by TUYA Start
+    pinyin_ime->cand_panel = lv_btnmatrix_create(lv_obj_get_parent(obj));
+// Modified by TUYA End
     lv_btnmatrix_set_map(pinyin_ime->cand_panel, (const char **)lv_btnm_def_pinyin_sel_map);
     lv_obj_set_size(pinyin_ime->cand_panel, LV_PCT(100), LV_PCT(5));
     lv_obj_add_flag(pinyin_ime->cand_panel, LV_OBJ_FLAG_HIDDEN);
 
     lv_btnmatrix_set_one_checked(pinyin_ime->cand_panel, true);
+// Modified by TUYA Start
+	lv_obj_clear_flag(pinyin_ime->cand_panel, LV_OBJ_FLAG_CLICK_FOCUSABLE);
+// Modified by TUYA End
 
     /* Set cand_panel style*/
     // Default style
@@ -684,8 +695,13 @@ static void lv_ime_pinyin_kb_event(lv_event_t * e)
                     pinyin_ime->k9_input_str[pinyin_ime->ta_count - 1] = '\0';
 #endif
 
-                pinyin_ime->ta_count = pinyin_ime->ta_count - 1;
+// Modified by TUYA Start
+                pinyin_ime->ta_count--;
+// Modified by TUYA End
                 if(pinyin_ime->ta_count <= 0) {
+// Modified by TUYA Start
+                    pinyin_ime_clear_data(obj);
+// Modified by TUYA End
                     lv_obj_add_flag(pinyin_ime->cand_panel, LV_OBJ_FLAG_HIDDEN);
 #if LV_IME_PINYIN_USE_K9_MODE
                     lv_memset_00(lv_pinyin_k9_cand_str, sizeof(lv_pinyin_k9_cand_str));
@@ -706,29 +722,40 @@ static void lv_ime_pinyin_kb_event(lv_event_t * e)
 #endif
             }
         }
-        else if((strcmp(txt, "ABC") == 0) || (strcmp(txt, "abc") == 0) || (strcmp(txt, "1#") == 0)) {
-            pinyin_ime->ta_count = 0;
-            lv_memset_00(pinyin_ime->input_char, sizeof(pinyin_ime->input_char));
+// Modified by TUYA Start
+        else if((strcmp(txt, "ABC") == 0) || (strcmp(txt, "abc") == 0) || (strcmp(txt, "1") == 0) ||
+                (strcmp(txt, LV_SYMBOL_OK) == 0)) {
+            pinyin_ime_clear_data(obj);
+// Modified by TUYA End
             return;
         }
         else if(strcmp(txt, LV_SYMBOL_KEYBOARD) == 0) {
+// Modified by TUYA Start
+#if LV_IME_PINYIN_USE_K9_MODE
             if(pinyin_ime->mode == LV_IME_PINYIN_MODE_K26) {
-                lv_ime_pinyin_set_mode(pinyin_ime, LV_IME_PINYIN_MODE_K9);
+                lv_ime_pinyin_set_mode(obj, LV_IME_PINYIN_MODE_K9);
             }
             else {
-                lv_ime_pinyin_set_mode(pinyin_ime, LV_IME_PINYIN_MODE_K26);
+                lv_ime_pinyin_set_mode(obj, LV_IME_PINYIN_MODE_K26);
                 lv_keyboard_set_mode(pinyin_ime->kb, LV_KEYBOARD_MODE_TEXT_LOWER);
             }
-            pinyin_ime_clear_data(obj);
-        }
-        else if(strcmp(txt, LV_SYMBOL_OK) == 0) {
-            pinyin_ime_clear_data(obj);
-        }
-        else if((pinyin_ime->mode == LV_IME_PINYIN_MODE_K26) && ((txt[0] >= 'a' && txt[0] <= 'z') || (txt[0] >= 'A' &&
-                                                                                                      txt[0] <= 'Z'))) {
-            strcat(pinyin_ime->input_char, txt);
-            pinyin_input_proc(obj);
-            pinyin_ime->ta_count++;
+#endif        
+             pinyin_ime_clear_data(obj);
+         }
+        //  else if(strcmp(txt, LV_SYMBOL_OK) == 0) {
+        //     pinyin_ime_clear_data(obj);
+        // }
+        else if((pinyin_ime->mode == LV_IME_PINYIN_MODE_K26) && (txt[0] >= 'a' && txt[0] <= 'z')) {
+            uint16_t len = strlen(pinyin_ime->input_char);
+            if(((txt[0] == 'i') || (txt[0] == 'u') || (txt[0] == 'v')) && (len == 0)){
+                pinyin_ime_clear_data(obj);
+                return;
+            }else{
+                snprintf(pinyin_ime->input_char + len, sizeof(pinyin_ime->input_char) - len, "%s", txt);
+                pinyin_input_proc(obj);
+                pinyin_ime->ta_count++;
+            }
+// Modified by TUYA End
         }
 #if LV_IME_PINYIN_USE_K9_MODE
         else if((pinyin_ime->mode == LV_IME_PINYIN_MODE_K9) && (txt[0] >= 'a' && txt[0] <= 'z')) {
@@ -765,18 +792,31 @@ static void lv_ime_pinyin_cand_panel_event(lv_event_t * e)
     lv_ime_pinyin_t * pinyin_ime = (lv_ime_pinyin_t *)obj;
 
     if(code == LV_EVENT_VALUE_CHANGED) {
+// Modified by TUYA Start
+        lv_obj_t * ta = lv_keyboard_get_textarea(pinyin_ime->kb);
+        if(ta == NULL) return;
+// Modified by TUYA End
         uint32_t id = lv_btnmatrix_get_selected_btn(cand_panel);
-        if(id == 0) {
+// Modified by TUYA Start
+        if(id == LV_BTNMATRIX_BTN_NONE) {
+            return;
+        }
+        else if(id == 0) {
+// Modified by TUYA End
             pinyin_page_proc(obj, 0);
             return;
         }
-        if(id == (LV_IME_PINYIN_CAND_TEXT_NUM + 1)) {
+// Modified by TUYA Start
+        else if(id == (LV_IME_PINYIN_CAND_TEXT_NUM + 1)) {
+// Modified by TUYA End
             pinyin_page_proc(obj, 1);
             return;
         }
 
         const char * txt = lv_btnmatrix_get_btn_text(cand_panel, id);
-        lv_obj_t * ta = lv_keyboard_get_textarea(pinyin_ime->kb);
+// Modified by TUYA Start
+        //lv_obj_t * ta = lv_keyboard_get_textarea(pinyin_ime->kb);
+// Modified by TUYA End
         uint16_t index = 0;
         for(index = 0; index < pinyin_ime->ta_count; index++)
             lv_textarea_del_char(ta);
@@ -819,6 +859,10 @@ static void pinyin_page_proc(lv_obj_t * obj, uint16_t dir)
     lv_ime_pinyin_t * pinyin_ime = (lv_ime_pinyin_t *)obj;
     uint16_t page_num = pinyin_ime->cand_num / LV_IME_PINYIN_CAND_TEXT_NUM;
     uint16_t sur = pinyin_ime->cand_num % LV_IME_PINYIN_CAND_TEXT_NUM;
+	
+// Modified by TUYA Start
+    if(!pinyin_ime->cand_str) return;
+// Modified by TUYA End
 
     if(dir == 0) {
         if(pinyin_ime->py_page) {
@@ -867,8 +911,9 @@ static void lv_ime_pinyin_style_change_event(lv_event_t * e)
     }
 }
 
-
-static void init_pinyin_dict(lv_obj_t * obj, lv_pinyin_dict_t * dict)
+// Modified by TUYA Start
+static void init_pinyin_dict(lv_obj_t * obj, const lv_pinyin_dict_t * dict)
+// Modified by TUYA End
 {
     lv_ime_pinyin_t * pinyin_ime = (lv_ime_pinyin_t *)obj;
 
@@ -892,8 +937,13 @@ static void init_pinyin_dict(lv_obj_t * obj, lv_pinyin_dict_t * dict)
         }
         else {
             headletter = dict[i].py[0];
+// Modified by TUYA Start
+            pinyin_ime->py_num[letter_calc] = offset_count;
+// Modified by TUYA End
             letter_calc = headletter - 'a';
-            pinyin_ime->py_num[letter_calc - 1] = offset_count;
+// Modified by TUYA Start
+            //pinyin_ime->py_num[letter_calc - 1] = offset_count;
+// Modified by TUYA End
             offset_sum += offset_count;
             pinyin_ime->py_pos[letter_calc] = offset_sum;
 
@@ -906,8 +956,9 @@ static void init_pinyin_dict(lv_obj_t * obj, lv_pinyin_dict_t * dict)
 static char * pinyin_search_matching(lv_obj_t * obj, char * py_str, uint16_t * cand_num)
 {
     lv_ime_pinyin_t * pinyin_ime = (lv_ime_pinyin_t *)obj;
-
-    lv_pinyin_dict_t * cpHZ;
+// Modified by TUYA Start
+    const lv_pinyin_dict_t * cpHZ;
+// Modified by TUYA End
     uint8_t index, len = 0, offset;
     volatile uint8_t count = 0;
 
@@ -915,6 +966,9 @@ static char * pinyin_search_matching(lv_obj_t * obj, char * py_str, uint16_t * c
     if(*py_str == 'i')     return NULL;
     if(*py_str == 'u')     return NULL;
     if(*py_str == 'v')     return NULL;
+// Modified by TUYA Start
+    if(*py_str == ' ')     return NULL;
+// Modified by TUYA End
 
     offset = py_str[0] - 'a';
     len = strlen(py_str);
@@ -958,8 +1012,13 @@ static void pinyin_ime_clear_data(lv_obj_t * obj)
 #endif
 
     pinyin_ime->ta_count = 0;
-    lv_memset_00(lv_pinyin_cand_str, (sizeof(lv_pinyin_cand_str)));
-    lv_memset_00(pinyin_ime->input_char, sizeof(pinyin_ime->input_char));
+// Modified by TUYA Start
+    for(uint8_t i = 0; i < LV_IME_PINYIN_CAND_TEXT_NUM; i++) {
+        memset(lv_pinyin_cand_str[i], 0x00, sizeof(lv_pinyin_cand_str[i]));
+        lv_pinyin_cand_str[i][0] = ' ';
+    }
+    memset(pinyin_ime->input_char, 0x00, sizeof(pinyin_ime->input_char));
+// Modified by TUYA End
 
     lv_obj_add_flag(pinyin_ime->cand_panel, LV_OBJ_FLAG_HIDDEN);
 }

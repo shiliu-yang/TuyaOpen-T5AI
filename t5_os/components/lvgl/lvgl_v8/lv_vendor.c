@@ -63,15 +63,15 @@ void lv_vendor_init(lv_vnd_config_t *config)
     }
 
     lv_port_indev_init();
+// Modified by TUYA Start
 #if 0
 #if (CONFIG_FATFS) && (LV_USE_FS_FATFS)
     lv_fatfs_init();
-// Modified by TUYA Start
 #elif (CONFIG_LITTLEFS) && (LV_USE_LFS)
     lv_lfs_init();
+#endif
+#endif
 // Modified by TUYA End
-#endif
-#endif
 
     ret = rtos_init_mutex(&g_disp_mutex);
     if (BK_OK != ret) {
@@ -101,13 +101,13 @@ void lv_vendor_deinit(void)
 
     lv_port_indev_deinit();
 
-#if (CONFIG_FATFS) && (LV_USE_FS_FATFS)
-    lv_fatfs_deinit();
 // Modified by TUYA Start
-#elif (CONFIG_LITTLEFS) && (LV_USE_LFS)
-    lv_lfs_deinit();
+// #if (CONFIG_FATFS) && (LV_USE_FS_FATFS)
+//     lv_fatfs_deinit();
+// #elif (CONFIG_LITTLEFS) && (LV_USE_LFS)
+//     lv_lfs_deinit();
+// #endif
 // Modified by TUYA End
-#endif
 
     rtos_deinit_mutex(&g_disp_mutex);
 

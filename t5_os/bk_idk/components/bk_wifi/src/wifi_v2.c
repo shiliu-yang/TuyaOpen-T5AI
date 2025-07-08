@@ -95,6 +95,9 @@ int ps_cmd_get(void);
 extern void* mac_vif_tx_stats_get(uint8_t vif_idx);
 extern uint8_t vif_mgmt_get_sta_vif_index();
 extern uint8_t vif_mgmt_get_softap_vif_index();
+
+static bool wifi_lowpower_mode=false;
+
 /**
  * wifi_sec_type_string - Get the security name as a text string
  * @state: security
@@ -3642,12 +3645,17 @@ bk_err_t bk_wifi_send_arp_set_rate_req(uint16_t arp_tx_rate) {
 	return rw_msg_send_arp_set_rate_req(vif_idx, arp_tx_rate);
 }
 
+bool bk_wifi_get_lowpower_mode(void) {
+	return wifi_lowpower_mode;
+}
+
 bk_err_t bk_wifi_send_listen_interval_req(uint8_t interval) {
 	if(!((1 == interval) || (3 == interval) || (10 == interval)))
 	{
 		WIFI_LOGE("set listen_int %d fail\r\n",interval);
 	}
-
+	if (interval >= 10)
+		wifi_lowpower_mode = true;
 	uint8_t vif_idx = 0;
 	vif_idx = wifi_netif_mac_to_vifid((uint8_t*)&g_sta_param_ptr->own_mac);
 

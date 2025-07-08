@@ -31,5 +31,15 @@ menu "SPI"
 		bool "SPI byte interval"
 		default n
 
+	config SPI_TEST
+		depends on SPI && DRIVER_TEST
+		bool "Enable spi test"
+		default n
+
+	config SPI_API_TEST
+		depends on SPI && DRIVER_TEST
+		bool "Enable spi_api test"
+		default n
+
 endmenu
 

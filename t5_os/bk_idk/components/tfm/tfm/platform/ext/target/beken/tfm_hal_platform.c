@@ -191,7 +191,7 @@ void tfm_s_2_ns_hook(void)
 		BK_LOGE(TAG, "memory malloc fails.\r\n");
 	}
 
-	BK_LOGI(TAG, "config ppc and NSPE is coming\r\n");
+	BK_LOGF(TAG, "config ppc and NSPE is coming\r\n");
 	// uint32_t partition_vir_offset = FLASH_PHY2VIRTUAL(CEIL_ALIGN_34(PARTITION_PARTITION_PHY_OFFSET));
 	// bk_flash_read_cbus(partition_vir_offset, buf, 48);
 	// for(int i=0;i<12;i++){

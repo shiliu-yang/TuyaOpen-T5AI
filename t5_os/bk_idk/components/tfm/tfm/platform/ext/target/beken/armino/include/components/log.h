@@ -46,6 +46,7 @@ extern "C" {
 #define BK_LOGE( tag, format, ... ) _OS_PRINTF(format, ##__VA_ARGS__)
 #define BK_LOGW( tag, format, ... ) _OS_PRINTF(format, ##__VA_ARGS__)
 #define BK_LOGI( tag, format, ... ) _OS_PRINTF(format, ##__VA_ARGS__)
+#define BK_LOGF( tag, format, ... ) _OS_PRINTF(format, ##__VA_ARGS__)
 #define BK_LOGD( tag, format, ... ) _OS_PRINTF(format, ##__VA_ARGS__)
 #define BK_LOGV( tag, format, ... ) _OS_PRINTF(format, ##__VA_ARGS__)
 
@@ -71,6 +72,7 @@ extern "C" {
 #define LOG_COLOR_E
 #define LOG_COLOR_W
 #define LOG_COLOR_I
+#define LOG_COLOR_F
 #define LOG_COLOR_D
 #define LOG_COLOR_V
 #define LOG_RESET_COLOR

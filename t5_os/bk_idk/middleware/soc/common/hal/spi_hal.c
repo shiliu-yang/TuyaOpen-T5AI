@@ -94,6 +94,12 @@ bk_err_t spi_hal_configure(spi_hal_t *hal, const spi_config_t *config)
 		spi_ll_set_role_slave(hal->hw);
 	} else {
 		spi_ll_set_role_master(hal->hw);
+		/* If two beken evb boards are tested against each other, for instance bk7239n/36n spi master with bk7239n/36n spi slave
+		 * rx_sample_edge will be equal to 2 using maximum spi baudrate(80MHz)
+		 */
+		if(config->baud_rate > 10000000){
+			spi_ll_set_rx_sample_edge(hal->hw, 1);
+		}
 	}
 	spi_ll_set_wire_mode(hal->hw, config->wire_mode);
 	if (config->wire_mode == SPI_4WIRE_MODE) {

@@ -140,13 +140,15 @@ static void deep_sleep_reset(void)
 extern uint8_t g_cur_bl2;
 void *get_pc(void)
 {
-    void *pc = (void *)&get_pc;
-    if (pc > (SOC_FLASH_DATA_BASE + CONFIG_BL2_VIRTUAL_CODE_START + CONFIG_BL2_VIRTUAL_CODE_START)) {
+    void *(*funcptr)() = get_pc;
+
+    if (funcptr > (SOC_FLASH_DATA_BASE + CONFIG_BL2_VIRTUAL_CODE_START + CONFIG_BL2_VIRTUAL_CODE_SIZE)) {
         g_cur_bl2 = 2;
     } else {
         g_cur_bl2 = 1;
     }
-    return pc;
+
+    return funcptr;
 }
 #endif
 
@@ -291,7 +293,7 @@ int main(void)
 
     BOOT_LOG_FORCE("Bootloader chainload address offset: 0x%x",
                  rsp.br_image_off);
-    BOOT_LOG_FORCE("Jump APP");
+    BOOT_LOG_FORCE("Jump TFM");
 #if CONFIG_BL2_WDT
     aon_wdt_feed();
 #endif

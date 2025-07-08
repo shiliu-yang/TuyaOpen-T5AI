@@ -370,7 +370,7 @@ static void app_main_thread(void *arg)
 	//if nessary ,close the main() function.
 #endif
 
-#if CONFIG_TFM_FWU
+#if CONFIG_TFM_FWU && CONFIG_SECURITY_OTA
 	bk_ota_accept_image();
 #endif
 	main();

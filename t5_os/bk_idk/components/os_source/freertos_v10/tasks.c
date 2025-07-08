@@ -44,13 +44,13 @@
 #include <modules/pm.h>
 
 // Modified by TUYA Start
-// lwipopts.h条件包含需要放在#include "FreeRTOS.h"之后，宏 CONFIG_SYS_CPU0 依赖其
+// lwipopts.h条件包含需要放在#include "FreeRTOS.h"之后，宏 CONFIG_SYS_CPU1 依赖其
 // 包含的sdkconfig.h , FreeRTOS.h ---> FreeRTOSConfig.h ---> sdkconfig.h
-#if (CONFIG_CPU_INDEX == 1)
-extern uint32_t start_tuya_thread;
-//#include "lwipopts.h"
+#if (CONFIG_SYS_CPU1 == 1)
+// #include "lwipopts.h"
+#include "lwip/err.h"
 #include "lwip/opt.h"
-#endif // CONFIG_CPU_INDEX == 1
+#endif // CONFIG_SYS_CPU1 == 1
 // Modified by TUYA End
 
 /* Lint e9021, e961 and e750 are suppressed as a MISRA exception justified
@@ -911,15 +911,14 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
 
             prvInitialiseNewTask( pxTaskCode, pcName, ( uint32_t ) usStackDepth, pvParameters, uxPriority, pxCreatedTask, pxNewTCB, NULL );
 
-// Modified by TUYA Start
-#if (CONFIG_CPU_INDEX == 1)
+            // Modified by TUYA Start
+#if (CONFIG_SYS_CPU1 == 1)
 #if (LWIP_NETCONN_SEM_PER_THREAD == 1)
-            extern int8_t lwip_socket_thread_init(void *task);
-            if (start_tuya_thread)
-                lwip_socket_thread_init(pxNewTCB);
+            extern err_t lwip_socket_thread_init(void *task);
+            lwip_socket_thread_init(pxNewTCB);
 #endif // LWIP_NETCONN_SEM_PER_THREAD == 1
-#endif // CONFIG_CPU_INDEX == 1
-// Modified by TUYA End
+#endif // CONFIG_SYS_CPU1 == 1
+            // Modified by TUYA End
 
             prvAddNewTaskToReadyList( pxNewTCB );
             xReturn = pdPASS;
@@ -1293,17 +1292,20 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
         TCB_t * pxTCB;
 
 // Modified by TUYA Start
-#if (CONFIG_CPU_INDEX == 1)
+#if (CONFIG_SYS_CPU1 == 1)
 #if (1 == LWIP_NETCONN_SEM_PER_THREAD)
 		extern int8_t lwip_socket_thread_cleanup(void *task);
-        if (start_tuya_thread)
-		    lwip_socket_thread_cleanup(xTaskToDelete);
+		lwip_socket_thread_cleanup(xTaskToDelete);
 #endif // LWIP_NETCONN_SEM_PER_THREAD == 1
-#endif // CONFIG_CPU_INDEX == 1
+#endif // CONFIG_SYS_CPU1 == 1
 // Modified by TUYA End
 
         taskENTER_CRITICAL();
         {
+            extern void pthread_internal_local_storage_destructor_callback(TaskHandle_t handle);
+            /* deleted memeory resource which malloc by lwip */
+            pthread_internal_local_storage_destructor_callback(xTaskToDelete);
+
             /* If null is passed in here then it is the calling task that is
              * being deleted. */
             pxTCB = prvGetTCBFromHandle( xTaskToDelete );

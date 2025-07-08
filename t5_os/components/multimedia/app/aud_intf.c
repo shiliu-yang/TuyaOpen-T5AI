@@ -114,7 +114,6 @@ static bk_err_t tuya_single_core_aud(uint32_t event, void *param)
     }
 
     tkl_mutex_lock(aud_mutex);
-	bk_printf("tuya_single_core_aud event:0x%x msg.param:0x%x\r\n", event, msg.param);
     ret = audio_event_handle(&msg);
     tkl_mutex_unlock(aud_mutex);
 
@@ -975,10 +974,6 @@ bk_err_t bk_aud_intf_voc_init(aud_intf_voc_setup_t setup)
 		aud_intf_info.voc_info.aud_setup.mic_samp_rate_points = 320;	//if AEC enable , the value is equal to aec_samp_rate_points, and the value not need to set
 		aud_intf_info.voc_info.aud_setup.speaker_samp_rate_points = 320;	//if AEC enable , the value is equal to aec_samp_rate_points, and the value not need to set
     }
-    // Modified by TUYA End
-
-    // Modified by TUYA Start
-    aud_intf_info.voc_info.mic2_disable = setup.mic2_disable;
     // Modified by TUYA End
 
 	aud_intf_info.voc_info.aud_setup.mic_frame_number = 2;

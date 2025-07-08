@@ -328,11 +328,11 @@ int hapd_intf_sta_del(struct prism2_hostapd_param *param, int len)
 #endif
 
 	ret = rw_msg_send_me_sta_del(sta_idx, tdls_sta);
-
+#ifndef CONFIG_BRIDGE
 	if (!ret)
 		// notify sta del status: drv_event_disassoc
 		wpa_ctrl_event_copy(WPA_CTRL_EVENT_DEL_STATION, param->sta_addr, ETH_ALEN);
-
+#endif
 	return ret;
 }
 

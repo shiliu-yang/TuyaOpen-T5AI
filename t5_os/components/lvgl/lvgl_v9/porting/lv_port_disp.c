@@ -254,10 +254,7 @@ static void disp_init(void)
     }
 
     if (!lvgl_camera_switch_flag) {
-// Modified by TUYA Start
-        // lvgl_frame_buffer = os_malloc(sizeof(frame_buffer_t));
-        lvgl_frame_buffer = LV_MEM_CUSTOM_ALLOC(sizeof(frame_buffer_t));
-// Modified by TUYA End
+        lvgl_frame_buffer = os_malloc(sizeof(frame_buffer_t));
         if (!lvgl_frame_buffer) {
             LOGI("%s %d lvgl_frame_buffer malloc fail\r\n", __func__, __LINE__);
             return;
@@ -285,10 +282,7 @@ static void disp_deinit(void)
     }
 
     if (lvgl_frame_buffer) {
-// Modified by TUYA Start
-        // os_free(lvgl_frame_buffer);
-        LV_MEM_CUSTOM_FREE(lvgl_frame_buffer);
-// Modified by TUYA End
+        os_free(lvgl_frame_buffer);
         lvgl_frame_buffer = NULL;
     }
 }

@@ -1093,6 +1093,15 @@ static void ble_exit_dut()
     ble_cal_exit_dut();
 }
 
+static uint8_t support_lpo_rosc(void)
+{
+    #if CONFIG_BLUETOOTH_SUPPORT_LPO_ROSC
+    return 1;
+    #else
+    return 0;
+    #endif
+}
+
 //warning: bt_osi_funcs must be data section, otherwise a2dp_source_pcm and a2dp_source_decode will trig watchdog !!!!!!!!
 static struct bt_osi_funcs_t bt_osi_funcs =
 {
@@ -1201,6 +1210,7 @@ static struct bt_osi_funcs_t bt_osi_funcs =
     ._flush_dcache = flush_dcache_wrapper,
     ._ble_enter_dut = ble_enter_dut,
     ._ble_exit_dut = ble_exit_dut,
+    ._support_lpo_rosc = support_lpo_rosc,
 };
 
 int bk_bt_os_adapter_init(void)
