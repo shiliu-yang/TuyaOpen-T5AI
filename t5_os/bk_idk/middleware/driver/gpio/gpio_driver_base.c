@@ -447,7 +447,6 @@ bk_err_t bk_gpio_ctrl_external_ldo(gpio_ctrl_ldo_module_e module,gpio_id_t gpio_
                     uint8_t lcd_active_level = 0, dvp_active_level = 0, usb_active_level = 0;
                     tkl_vi_get_power_info(UVC_CAMERA, &usb_ldo, &usb_active_level);
                     tkl_vi_get_power_info(DVP_CAMERA, &dvp_ldo, &dvp_active_level);
-                    tkl_display_power_ctrl_pin(&lcd_ldo, &lcd_active_level);
                     if ((gpio_id == lcd_ldo) || (gpio_id == usb_ldo) || (gpio_id == dvp_ldo)) {
                         /*gpio dev unmap*/
                         BK_LOG_ON_ERR(bk_gpio_disable_output(gpio_id));
@@ -509,7 +508,6 @@ bk_err_t bk_gpio_ctrl_external_ldo(gpio_ctrl_ldo_module_e module,gpio_id_t gpio_
                         uint8_t lcd_active_level = 0, dvp_active_level = 0, usb_active_level = 0;
                         tkl_vi_get_power_info(UVC_CAMERA, &usb_ldo, &usb_active_level);
                         tkl_vi_get_power_info(DVP_CAMERA, &dvp_ldo, &dvp_active_level);
-                        tkl_display_power_ctrl_pin(&lcd_ldo, &lcd_active_level);
                         if ((gpio_id == lcd_ldo) || (gpio_id == usb_ldo) || (gpio_id == dvp_ldo)) {
                             /*gpio dev unmap*/
                             BK_LOG_ON_ERR(bk_gpio_disable_output(gpio_id));

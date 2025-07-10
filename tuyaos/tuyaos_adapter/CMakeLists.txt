@@ -74,7 +74,6 @@ endif()
 
 if (CONFIG_SYS_CPU1)
     list(APPEND srcs
-        src/driver/tkl_cellular.c
         src/driver/tkl_lwip_1.c
         src/driver/tkl_wifi_1.c
         src/driver/tkl_hci_1.c
@@ -119,6 +118,7 @@ list(APPEND srcs
     src/driver/tkl_watchdog.c
     src/driver/encrypt.c
     src/driver/tkl_wired.c
+    src/driver/tkl_cellular.c
     src/driver/tkl_asr.c
     src/driver/tkl_rgb.c
     src/driver/tkl_8080.c

@@ -10,6 +10,7 @@
 #include <string.h>
 #include "tuya_cloud_types.h"
 #include "tuya_error_code.h"
+#include "sdkconfig.h"
 #include "ethernetif.h"
 #include "lwip/netifapi.h"
 #include "FreeRTOS.h"
@@ -20,6 +21,7 @@
 #include "tkl_thread.h"
 #include "tkl_mutex.h"
 #include "tkl_system.h"
+#include "tkl_lwip.h"
 #include "spi_eth_drv.h"
 #if CONFIG_LWIP_PPP_SUPPORT
 #include "net.h"
@@ -169,6 +171,7 @@ OPERATE_RET tkl_cellular_get_ip(NW_IP_S *ip)
     return OPRT_OK;
 #endif
 #else
+    bk_printf("%s: Cellular link not supported\r\n", __func__);
     return OPRT_NOT_SUPPORTED;
 #endif    
 }

@@ -35,7 +35,6 @@
 
 #if CONFIG_ETH
 #include <string.h>
-#include "lwip/opt.h"
 #include "lwip/timeouts.h"
 #include "lwip/tcpip.h"
 #include "lwip/ethip6.h"
@@ -52,6 +51,7 @@
 #include "gpio_driver.h"
 #include "lwip/netifapi.h"
 #include "lwipopts.h"
+#include "lwip/opt.h"
 #include "net.h"
 #include "sys_hal.h"
 #include "miiphy.h"
