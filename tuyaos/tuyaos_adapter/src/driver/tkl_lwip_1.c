@@ -101,7 +101,7 @@ struct netif *tkl_lwip_get_netif_by_index(int netif_idx)
         return NULL;
 
     if(lwip_ipc_msg.ret_value)
-        return NULL;
+        return lwip_ipc_msg.ret_value;
 
     return (struct netif *)lwip_ipc_msg.res_param;
 }

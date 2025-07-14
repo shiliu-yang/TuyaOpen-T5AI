@@ -236,6 +236,8 @@ OPERATE_RET tkl_ethernetif_output(TKL_NETIF_HANDLE netif, TKL_PBUF_HANDLE p)
         // tuya_ipc_send_sync(&lwip_ipc_msg);
 
     }
+
+output_over:
     if(0 != ret)
     {
         err = ERR_TIMEOUT;
@@ -369,7 +371,7 @@ forward:
     }
 #endif
 
-// process:
+process:
     switch (htons(ethhdr->type))
     {
 #if 0
