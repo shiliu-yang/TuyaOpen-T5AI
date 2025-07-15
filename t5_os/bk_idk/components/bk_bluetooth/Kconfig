@@ -40,4 +40,8 @@ menu "Bk_ble"
     config BLUETOOTH_CALIBRATION_ENABLE
         bool "whether to enable bluetooth calibration"
         default y
+
+    config BLUETOOTH_SUPPORT_LPO_ROSC
+        bool "support lpo rosc"
+        default n
 endmenu

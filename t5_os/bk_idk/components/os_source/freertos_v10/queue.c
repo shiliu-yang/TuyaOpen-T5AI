@@ -426,7 +426,7 @@ BaseType_t xQueueGenericReset( QueueHandle_t xQueue,
 /*-----------------------------------------------------------*/
 
 #if ( configSUPPORT_DYNAMIC_ALLOCATION == 1 )
-
+// Modified by TUYA Start
     QueueHandle_t xQueueGenericCreate_in_Psram( const UBaseType_t uxQueueLength,
                                                 const UBaseType_t uxItemSize,
                                                 const uint8_t ucQueueType )
@@ -489,7 +489,7 @@ BaseType_t xQueueGenericReset( QueueHandle_t xQueue,
 
         return pxNewQueue;
     }
-
+// Modified by TUYA End
 
     QueueHandle_t xQueueGenericCreate( const UBaseType_t uxQueueLength,
                                        const UBaseType_t uxItemSize,

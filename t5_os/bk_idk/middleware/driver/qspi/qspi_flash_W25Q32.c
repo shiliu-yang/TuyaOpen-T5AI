@@ -240,6 +240,12 @@ static bk_err_t bk_qspi_flash_w25q_write_status2(qspi_id_t id, uint8_t status_re
     return BK_OK;
 }
 
+static void __bk_qspi_delay(uint32_t us)
+{
+    volatile uint32_t i = us;
+    while (i--);
+}
+
 static void bk_qspi_flash_w25q_wait_oip_done(qspi_id_t id)
 {
     uint32_t status_reg_data = 0;
@@ -252,7 +258,7 @@ static void bk_qspi_flash_w25q_wait_oip_done(qspi_id_t id)
         if(i == 2000) {
             QSPI_LOGW("[%s]: wait flsh progress done timeout.\n", __func__);
         }
-        rtos_delay_milliseconds(1);
+        __bk_qspi_delay(5);
     }
 }
 

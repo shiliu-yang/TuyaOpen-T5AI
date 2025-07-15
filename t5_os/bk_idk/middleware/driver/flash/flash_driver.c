@@ -1123,14 +1123,14 @@ __attribute__((section(".iram"))) bk_err_t bk_flash_enter_deep_sleep(void)
 
 	// flash need to change 2 line when do flash operate except read
 	// need to recover 4 line, please do it manually
-	//if (FLASH_LINE_MODE_FOUR == bk_flash_get_line_mode())
-	//	bk_flash_set_line_mode(FLASH_LINE_MODE_TWO);
+	// if (FLASH_LINE_MODE_FOUR == bk_flash_get_line_mode())
+	// 	bk_flash_set_line_mode(2);
 
 	ret = flash_bypass_op_write(&op_code, NULL, 0);
 	if(ret == 0)// success
 	{
 		// delay T_dp: 3us
-		//for(volatile int j=0; j<500; j++);
+		// for(volatile int j=0; j<500; j++);
 		return BK_OK;
 	}
 #endif

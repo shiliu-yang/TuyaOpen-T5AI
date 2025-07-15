@@ -287,7 +287,7 @@ HTTP_CMD_ERR:
 }
 #endif
 
-#if CONFIG_OTA_CONFIRM_UPDATE
+#if CONFIG_OTA_CONFIRM_UPDATE && CONFIG_SECURITY_OTA
 void ota_confirm_Command(char *pcWriteBuffer, int xWriteBufferLen, int argc, char **argv)
 {
 	if (argc != 2) {

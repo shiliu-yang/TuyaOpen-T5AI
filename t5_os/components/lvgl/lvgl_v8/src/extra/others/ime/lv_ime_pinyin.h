@@ -124,7 +124,9 @@ lv_obj_t * lv_ime_pinyin_get_cand_panel(lv_obj_t * obj);
  * @param obj  pointer to a Pinyin input method object
  * @return     pointer to the Pinyin input method dictionary
  */
-lv_pinyin_dict_t * lv_ime_pinyin_get_dict(lv_obj_t * obj);
+// Modified by TUYA Start
+const lv_pinyin_dict_t * lv_ime_pinyin_get_dict(lv_obj_t * obj);
+// Modified by TUYA End
 
 /*=====================
  * Other functions

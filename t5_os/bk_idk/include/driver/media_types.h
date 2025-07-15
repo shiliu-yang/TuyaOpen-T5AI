@@ -28,7 +28,7 @@ extern "C" {
  * @brief define all image resolution, unit pixel
  * @{
  */
-
+#define PIXEL_128   (128) 		// Modified by TUYA
 #define PIXEL_170   (170)
 #define PIXEL_240   (240)
 #define PIXEL_272   (272)
@@ -115,6 +115,7 @@ typedef enum
 typedef enum
 {
 	PPI_DEFAULT     = 0,
+	PPI_128X128     = (PIXEL_128 << 16) | PIXEL_128, 	// Modified by TUYA
 	PPI_170X320     = (PIXEL_170 << 16) | PIXEL_320,
 	PPI_320X240     = (PIXEL_320 << 16) | PIXEL_240,
 	PPI_320X480     = (PIXEL_320 << 16) | PIXEL_480,

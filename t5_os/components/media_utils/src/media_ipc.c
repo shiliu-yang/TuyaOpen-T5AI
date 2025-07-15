@@ -679,12 +679,14 @@ int media_ipc_init(void)
 	mb_chnl_ctrl(MB_CHNL_MIPC_SYNC, MB_CHNL_SET_TX_CMPL_ISR, media_ipc_mailbox_tx_cmpl_isr);
 #endif
 
+	// Modified by TUYA Start
 	ret = rtos_create_thread(&media_ipc_info->thread,
 								9,
 								"ipc thread",
 								(beken_thread_function_t)media_ipc_thread_entry,
 								8192,
 								NULL);
+	// Modified by TUYA End
 
 
 #if MEDIA_IPC_UT_TEST

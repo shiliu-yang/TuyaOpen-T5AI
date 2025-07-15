@@ -12,6 +12,9 @@ if("${CONFIG_SOC_ARCH}" STREQUAL ${COMPONENT_NAME})
 		stack_base.c
 		trap_base.c
 		arm.c
+		fpb.c
+		dwt.c
+		debug_monitor_exception.c
 		arch_interrupt.c
 		jump.c
 		arch_delay.c
@@ -30,7 +33,7 @@ if(CONFIG_CACHE_ENABLE)
 endif()
 
 if(CONFIG_FREERTOS)
-	list(APPEND incs os/freertos)
+	list(APPEND incs os/freertos ./)
 	list(APPEND srcs os/freertos/cpu.c)
 elseif(CONFIG_LITEOS_M)
 	list(APPEND incs os/liteos_m)

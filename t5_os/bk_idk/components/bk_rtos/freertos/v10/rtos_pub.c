@@ -151,16 +151,16 @@ bk_err_t rtos_create_psram_thread( beken_thread_t* thread, uint8_t priority, con
 
 bk_err_t rtos_delete_thread( beken_thread_t* thread )
 {
-extern void pthread_internal_local_storage_destructor_callback(TaskHandle_t handle);
+// extern void pthread_internal_local_storage_destructor_callback(TaskHandle_t handle);
 	if ( thread == NULL )
     {
 		RTOS_ASSERT_INT_ENABLED_WITH_SCHEDULER();
-        pthread_internal_local_storage_destructor_callback(NULL);
+        // pthread_internal_local_storage_destructor_callback(NULL);
         vTaskDelete( NULL );
     }
     else if ( xTaskIsTaskFinished( *thread ) != pdTRUE )
     {
-        pthread_internal_local_storage_destructor_callback(*thread);
+        // pthread_internal_local_storage_destructor_callback(*thread);
         vTaskDelete( *thread );
     }
     return kNoErr;

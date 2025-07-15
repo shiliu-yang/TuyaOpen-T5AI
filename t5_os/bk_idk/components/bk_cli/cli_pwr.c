@@ -218,6 +218,14 @@ static void cli_pm_cmd(char *pcWriteBuffer, int xWriteBufferLen, int argc, char 
 			bk_gpio_register_isr(pm_param1, cli_pm_gpio_callback);
 			bk_gpio_register_wakeup_source(pm_param1,pm_param2);
 			bk_pm_wakeup_source_set(PM_WAKEUP_SOURCE_INT_GPIO, NULL);
+			// Modified by TUYA Start
+			bk_gpio_enable_input(pm_param1);
+			bk_gpio_enable_pull(pm_param1);
+			if((pm_param2 == GPIO_INT_TYPE_LOW_LEVEL) || (pm_param2 == GPIO_INT_TYPE_FALLING_EDGE))
+				bk_gpio_pull_up(pm_param1);
+			else
+				bk_gpio_pull_down(pm_param1);
+			// Modified by TUYA End
 			#endif //CONFIG_GPIO_WAKEUP_SUPPORT
 		}
 	}

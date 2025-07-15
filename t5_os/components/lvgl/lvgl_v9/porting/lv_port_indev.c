@@ -197,13 +197,6 @@ static void touchpad_init(void)
     /*Your code comes here*/
 }
 
-// Modified by TUYA Start
-void  __attribute__((weak)) tuya_app_gui_touch_monitor(void)
-{
-
-}
-// Modified by TUYA End
-
 /*Will be called by the library to read the touchpad*/
 static void touchpad_read(lv_indev_t * indev_drv, lv_indev_data_t * data)
 {
@@ -256,15 +249,6 @@ static void touchpad_read(lv_indev_t * indev_drv, lv_indev_data_t * data)
         {
             data->continue_reading = true;
         }
-// Modified by TUYA Start
-        extern void tuya_app_gui_touch_monitor(void);
-        if (last_state == LV_INDEV_STATE_PRESSED) {     //pressing !
-            tuya_app_gui_touch_monitor();
-        }
-        else {  //released !
-
-        }
-// Modified by TUYA End
     }while(0);
 
     /*Set the last pressed coordinates*/

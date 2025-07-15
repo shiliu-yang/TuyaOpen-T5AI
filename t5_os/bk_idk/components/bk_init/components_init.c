@@ -358,9 +358,7 @@ int components_init(void)
 	bandgap_init();
 	random_init();
 #if (CONFIG_SYS_CPU0)
-// Modified by TUYA Start
-//	wdt_init();
-// Modified by TUYA End
+	wdt_init();
 #endif
 
 	bk_stack_guard_setup();

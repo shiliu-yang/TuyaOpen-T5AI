@@ -80,10 +80,12 @@ static void rosc_ckmn_isr(void)
 	// GPIO_DOWN(16);
 	// CKMN_LOGI("ckmn_rosc_isr rosc_freq:%7.2f\r\n", s_rosc_freq_hz);
 	bk_ckmn_ckest_disable();
+	bk_pm_module_vote_sleep_ctrl(PM_SLEEP_MODULE_NAME_ROSC_PROG,1,0);
 }
 
 bk_err_t bk_rosc_32k_ckest_prog(uint32_t count)
 {
+	bk_pm_module_vote_sleep_ctrl(PM_SLEEP_MODULE_NAME_ROSC_PROG,0,0);
 #if CONFIG_ROSC_COMPENSATION
 	bk_aon_rtc_get_current_tick_with_compensation(AON_RTC_ID_1); // trig tick compensation
 #endif
@@ -136,6 +138,8 @@ static void rosc_calib_thread(void *args)
 	// init
 	ROSC_LOGI("ckmn calib rosc thread start\r\n");
 	sys_drv_rosc_calibration(ROSC_CALIB_MANUAL_MODE, cin0 + (cin1 << 16)); // manual mode
+	// prevent sleep first and release it after finished
+	bk_pm_module_vote_sleep_ctrl(PM_SLEEP_MODULE_NAME_ROSC, 0x0, 0x0);
 	// calibration progress
 	while (1)
 	{
@@ -198,6 +202,13 @@ static void rosc_calib_thread(void *args)
 			}
 		}
 	}
+
+	bk_pm_module_vote_sleep_ctrl(PM_SLEEP_MODULE_NAME_ROSC, 0x1, 0x0);
+
+	// update rosc freq
+	s_rosc_freq_hz = s_freq_32k;
+	float theta = s_rosc_freq_hz / ROSC_CLK_32K;
+	s_rosc_ppm = (int32_t)(1e6 * (1 - theta) + ROSC_CKMN_PPM * theta);
 
 	// complete
 	if (ret) {

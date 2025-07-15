@@ -61,5 +61,8 @@ menu "PWR_CLK"
 	config DIGLDO_LOW_VOLTAGE_ENABLE
 		 bool "enable dig ldo low voltage "
 		default y
+	config CP1_POWER_ON_WHEN_LV
+		 bool "cpu 1 power on when enter low voltage"
+		default n
 endmenu
 

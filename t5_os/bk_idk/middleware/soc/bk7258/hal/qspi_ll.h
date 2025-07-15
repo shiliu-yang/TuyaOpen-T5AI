@@ -453,7 +453,7 @@ if(QSPI_FLASH == cmd->device) {
                 hw->cmd_c_h.v &= (~(QSPI_F_CMD2_M << QSPI_F_CMD2_S));
 				hw->cmd_c_h.v |= ((addr_m & QSPI_F_CMD2_M) << QSPI_F_CMD2_S);
 				hw->cmd_c_h.v &= (~(QSPI_F_CMD3_M << QSPI_F_CMD3_S));
-				hw->cmd_c_h.v |= ((addr_l & QSPI_F_CMD3_M) << QSPI_F_CMD3_S);
+				hw->cmd_c_h.v |= ((addr_l & QSPI_F_CMD3_M) << QSPI_F_CMD3_S);              
                 hw->cmd_c_cfg1.v = 0xc0;
 
 			// Modified by TUYA Start
@@ -506,7 +506,7 @@ if(QSPI_FLASH == cmd->device) {
 			hw->cmd_d_l.v = 0;
 			hw->cmd_d_h.v &= (~(QSPI_F_CMD1_M << QSPI_F_CMD1_S));
 			hw->cmd_d_h.v |= (cmd->cmd & (QSPI_F_CMD1_M << QSPI_F_CMD1_S));
-			if((FLASH_RD_S0_S7_CMD == cmd->cmd) || (FLASH_RD_S8_S15_CMD == cmd->cmd) ||
+			if((FLASH_RD_S0_S7_CMD == cmd->cmd) || (FLASH_RD_S8_S15_CMD == cmd->cmd) || 
                 ((FLASH_READ_ID_CMD == cmd->cmd) && (cmd->addr_valid_bit == QSPI_ADDR_INVALID))) {
 				hw->cmd_d_cfg1.v = 0xc;
 

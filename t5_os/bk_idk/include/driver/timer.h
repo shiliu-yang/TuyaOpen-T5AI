@@ -78,6 +78,7 @@ bk_err_t bk_timer_driver_deinit(void);
 bk_err_t bk_timer_start(timer_id_t timer_id, uint32_t time_ms, timer_isr_t callback);
 
 // Modified by TUYA Start
+bk_err_t bk_timer_set_period_us(timer_id_t timer_id, uint64_t time_us);
 /**
  * @brief     Start the timer
  *
@@ -180,7 +181,7 @@ bool bk_timer_is_interrupt_triggered(timer_id_t timer_id);
 
 /**
  * @brief     Get the timer count value in ms or us
- * 
+ *
  * @param timer_id the timer id
  * @param div the divider of clock frequency
  * @param last_count last count of the timer
@@ -192,21 +193,21 @@ uint64_t bk_timer_get_time(timer_id_t timer_id, uint32_t div, uint32_t last_coun
 
 /**
  * @brief     This function set the delay based on the current running counter, which is different from bk_timer_start.
- * 
+ *
  * @param timer_id the timer id
  * @param time_us time delay value of the timer by us
  * @param callback the timer delay call back function
- * @return 
+ * @return
  *    - BK_OK: succeed
  *    - others: other errors.
  */
 bk_err_t bk_timer_delay_with_callback(timer_id_t timer_id, uint64_t time_us, timer_isr_t callback);
 
 /**
- * @brief     Cancel the timer delay task, reset timer and set ISR to NULL, it will not disable the timer, which is different from bk_timer_stop. 
- * 
+ * @brief     Cancel the timer delay task, reset timer and set ISR to NULL, it will not disable the timer, which is different from bk_timer_stop.
+ *
  * @param timer_id the timer id
- * @return 
+ * @return
  *    - BK_OK: succeed
  *    - others: other errors.
  */

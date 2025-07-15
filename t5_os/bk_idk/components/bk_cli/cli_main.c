@@ -1401,9 +1401,11 @@ int bk_cli_init(void)
 	cli_wifi_init();
 #endif
 
+// Modified by TUYA Start
 // #if (CLI_CFG_NETIF == 1)
 // 	cli_netif_init();
 // #endif
+// Modified by TUYA End
 
 #if (CLI_CFG_PHY == 1)
 	cli_phy_init();
@@ -1571,6 +1573,14 @@ int bk_cli_init(void)
 
 #if (CLI_CFG_MEM == 1)
 	cli_mem_init();
+#endif
+
+#if ((CONFIG_SOC_BK7236XX) && (CLI_CFG_FPB == 1))
+	cli_fpb_init();
+#endif
+
+#if ((CONFIG_SOC_BK7236XX) && (CLI_CFG_DWT == 1))
+	cli_dwt_init();
 #endif
 
 #if (CLI_CFG_TIMER == 1)
@@ -1794,6 +1804,10 @@ int bk_cli_init(void)
 
 #if (CONFIG_PSA_CUSTOMIZATION_TEST)
 	cli_psa_customization_init();
+#endif
+
+#if (CONFIG_BK_MODEM)
+	cli_modem_init();
 #endif
 
 #endif //CONFIG_DEBUG_FIRMWARE

@@ -52,13 +52,6 @@
         #undef LV_MEM_POOL_INCLUDE
         #undef LV_MEM_POOL_ALLOC
     #endif
-// Modified by TUYA Start
-#elif LV_USE_STDLIB_MALLOC == LV_STDLIB_CUSTOM
-#include <os/mem.h>   /*Header for the dynamic memory function*/
-    #define LV_MEM_CUSTOM_ALLOC     psram_malloc
-    #define LV_MEM_CUSTOM_FREE      psram_free
-    #define LV_MEM_CUSTOM_REALLOC   bk_psram_realloc
-// Modified by TUYA End
 #endif  /*LV_USE_STDLIB_MALLOC == LV_STDLIB_BUILTIN*/
 
 /*====================
@@ -121,7 +114,7 @@
 
     /* Enable native helium assembly to be compiled */
     #define LV_USE_NATIVE_HELIUM_ASM    0
-
+    
     /* 0: use a simple renderer capable of drawing only simple rectangles with gradient, images, texts, and straight lines only
      * 1: use a complex renderer capable of drawing rounded corners, shadow, skew lines, and arcs too */
     #define LV_DRAW_SW_COMPLEX          1
@@ -210,9 +203,7 @@
  *-----------*/
 
 /*Enable the log module*/
-// Modified by TUYA Start
-#define LV_USE_LOG 1
-// Modified by TUYA End
+#define LV_USE_LOG 0
 #if LV_USE_LOG
 
     /*How important log should be added:
@@ -493,14 +484,6 @@
     #define LV_USE_CALENDAR_HEADER_DROPDOWN 1
 #endif  /*LV_USE_CALENDAR*/
 
-// Modified by TUYA Start
-#define LV_USE_CAROUSEL 1
-
-#define LV_USE_DCLOCK 1
-
-#define LV_USE_RADIOBTN 1
-// Modified by TUYA End
-
 #define LV_USE_CANVAS     1
 
 #define LV_USE_CHART      1
@@ -628,9 +611,7 @@
 #endif
 
 /*API for FATFS (needs to be added separately). Uses f_open, f_read, etc*/
-// Modified by TUYA Start
-#define LV_USE_FS_FATFS 1
-// Modified by TUYA End
+#define LV_USE_FS_FATFS 0
 #if LV_USE_FS_FATFS
     #define LV_FS_FATFS_LETTER '/'      /*Set an upper cased letter on which the drive will accessible (e.g. 'A')*/
     #define LV_FS_FATFS_CACHE_SIZE 0    /*>0 to cache this number of bytes in lv_fs_read()*/
@@ -648,14 +629,6 @@
 #if LV_USE_FS_LITTLEFS
     #define LV_FS_LITTLEFS_LETTER '\0'     /*Set an upper cased letter on which the drive will accessible (e.g. 'A')*/
 #endif
-
-/*PNG decoder library*/
-// Modified by TUYA Start
-#define LV_USE_PNG 1
-#if LV_USE_PNG
-    #define LV_PNG_USE_PSRAM 1          /* 0: use default sram memory, 1: use psram memory. */
-#endif
-// Modified by TUYA End
 
 /*LODEPNG decoder library*/
 #define LV_USE_LODEPNG 0
@@ -695,15 +668,10 @@
 #define LV_USE_BARCODE 0
 
 /*FreeType library*/
-// Modified by TUYA Start
-#define LV_USE_FREETYPE CONFIG_FREETYPE
-// Modified by TUYA End
+#define LV_USE_FREETYPE 0
 #if LV_USE_FREETYPE
     /*Let FreeType to use LVGL memory and file porting*/
-    // Modified by TUYA Start
-    #define LV_FREETYPE_CACHE_SIZE (16 * 1024)
-
-    #define LV_FREETYPE_USE_LVGL_PORT 1
+    #define LV_FREETYPE_USE_LVGL_PORT 0
 
     /*Cache count of the glyphs in FreeType. It means the number of glyphs that can be cached.
      *The higher the value, the more memory will be used.*/
@@ -748,12 +716,7 @@
  *==================*/
 
 /*1: Enable API to take snapshot for object*/
-// Modified by TUYA Start
-#define LV_USE_SNAPSHOT 1
-#if LV_USE_SNAPSHOT
-    #define LV_SNAPSHOT_USE_PSRAM 1          /* 0: use default sram memory, 1: use psram memory. */
-#endif
-// Modified by TUYA End
+#define LV_USE_SNAPSHOT 0
 
 /*1: Enable system monitor component*/
 #define LV_USE_SYSMON   1
@@ -817,11 +780,6 @@
 
 /*1: Support using images as font in label or span widgets */
 #define LV_USE_IMGFONT 0
-
-// Modified by TUYA Start
-/*Enable the text progress bar*/
-#define LV_USE_TEXTPROGRESS 1
-// Modified by TUYA End
 
 /*1: Enable an observer pattern implementation*/
 #define LV_USE_OBSERVER 1

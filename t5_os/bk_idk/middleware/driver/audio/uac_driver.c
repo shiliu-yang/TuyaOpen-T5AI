@@ -25,7 +25,6 @@
 #include <components/uvc_uac_api_common.h>
 // Modified by TUYA Start
 #include <gpio_map.h>
-#include "tkl_video_in.h"
 // Modified by TUYA End
 
 

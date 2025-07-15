@@ -167,4 +167,8 @@ menu "Lvgl"
 	config LV_CODE_LOAD_PSRAM
 		bool "Enable Lv Code load psram"
 		default n
+
+	config LVGL_USE_TRIPLE_BUFFERS
+		bool "Enable LVGL use three buffers"
+		default n
 endmenu

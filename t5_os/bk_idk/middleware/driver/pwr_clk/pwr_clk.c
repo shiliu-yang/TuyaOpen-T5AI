@@ -83,7 +83,7 @@ static void pm_cp1_mailbox_init();
 bk_err_t pm_cp1_mailbox_response(uint32_t cmd, int ret);
 bk_err_t bk_pm_cp1_ctrl_state_set(pm_mailbox_communication_state_e state);
 pm_mailbox_communication_state_e bk_pm_cp1_ctrl_state_get();
-static void pm_cp1_mailbox_send_data(uint32_t cmd, uint32_t param1,uint32_t param2,uint32_t param3);
+static bk_err_t pm_cp1_mailbox_send_data(uint32_t cmd, uint32_t param1,uint32_t param2,uint32_t param3);
 #endif
 
 #if CONFIG_SYS_CPU0 && (CONFIG_CPU_CNT > 1)
@@ -226,7 +226,7 @@ bk_err_t bk_pm_cp1_recovery_response(uint32_t cmd, pm_cp1_prepare_close_module_n
 	pm_cp1_mailbox_send_data(cmd,module_name,state,0);
 	return BK_OK;
 }
-static void pm_cp1_mailbox_send_data(uint32_t cmd, uint32_t param1,uint32_t param2,uint32_t param3)
+static bk_err_t pm_cp1_mailbox_send_data(uint32_t cmd, uint32_t param1,uint32_t param2,uint32_t param3)
 {
 	bk_err_t ret = BK_OK;
 	mb_chnl_cmd_t mb_cmd = {0};
@@ -238,7 +238,7 @@ static void pm_cp1_mailbox_send_data(uint32_t cmd, uint32_t param1,uint32_t para
 	mb_cmd.param3 = param3;
 	ret = mb_chnl_write(MB_CHNL_PWC, &mb_cmd);
 	GLOBAL_INT_RESTORE();
-	os_printf("%s %d\r\n",__func__, ret);
+	return ret;
 }
 bk_err_t pm_cp1_mailbox_response(uint32_t cmd, int ret)
 {
@@ -550,7 +550,9 @@ static void pm_module_bootup_cpu1(pm_power_module_name_e module)
 		if(module == PM_POWER_MODULE_NAME_CPU1)
 		{
 boot_cp1:
+			#if !CONFIG_CP1_POWER_ON_WHEN_LV
 			bk_pm_module_vote_sleep_ctrl(PM_SLEEP_MODULE_NAME_CPU1, 0, 0);
+			#endif
             bk_pm_module_vote_power_ctrl(PM_POWER_MODULE_NAME_CPU1, PM_POWER_MODULE_STATE_ON);
 
 			#if defined(RECV_CMD_LOG_FROM_MBOX)
@@ -609,9 +611,10 @@ static void pm_module_shutdown_cpu1(pm_power_module_name_e module)
 	{
 		if(module == PM_POWER_MODULE_NAME_CPU1)
 		{
-            stop_cpu1_core();
-		    bk_pm_module_vote_power_ctrl(PM_POWER_MODULE_NAME_CPU1, PM_POWER_MODULE_STATE_OFF);
-
+			stop_cpu1_core();
+			bk_pm_module_vote_psram_ctrl(PM_POWER_PSRAM_MODULE_NAME_MEDIA, PM_POWER_MODULE_STATE_OFF);
+			bk_pm_module_vote_power_ctrl(PM_POWER_MODULE_NAME_CPU1, PM_POWER_MODULE_STATE_OFF);
+			bk_pm_module_vote_cpu_freq(PM_DEV_ID_CPU1,PM_CPU_FRQ_DEFAULT);
 			GLOBAL_INT_DISABLE();
 			s_pm_cp1_boot_ready = 0;
 			s_pm_cp1_closing = 0;
@@ -622,8 +625,9 @@ static void pm_module_shutdown_cpu1(pm_power_module_name_e module)
 			{
 				rtos_deinit_semaphore(&s_sync_cp1_open_sema);
 			}
-
+			#if !CONFIG_CP1_POWER_ON_WHEN_LV
 			bk_pm_module_vote_sleep_ctrl(PM_SLEEP_MODULE_NAME_CPU1, 1, 0);
+			#endif
 			os_printf("Shutdown_cp1[%d][%d][%d]\r\n",s_pm_cp1_closing,ret,s_pm_cp1_sema_count);
 		}
 	}
@@ -668,11 +672,12 @@ bk_err_t bk_pm_module_vote_boot_cp1_ctrl(pm_boot_cp1_module_name_e module,pm_pow
 	os_printf("boot_cp1 %d %d 0x%x [%d]E_2\r\n",module, power_state,s_pm_cp1_ctrl_state,ret);
     if(power_state == PM_POWER_MODULE_STATE_ON)//power on
     {
+		bk_pm_module_vote_cpu_freq(PM_DEV_ID_CPU1,PM_CPU_FRQ_480M);
 		bk_pm_module_vote_psram_ctrl(PM_POWER_PSRAM_MODULE_NAME_MEDIA, PM_POWER_MODULE_STATE_ON);
-        GLOBAL_INT_DISABLE();
-        s_pm_cp1_ctrl_state |= 0x1 << (module);
-        GLOBAL_INT_RESTORE();
-        pm_module_bootup_cpu1(PM_POWER_MODULE_NAME_CPU1);
+		GLOBAL_INT_DISABLE();
+		s_pm_cp1_ctrl_state |= 0x1 << (module);
+		GLOBAL_INT_RESTORE();
+		pm_module_bootup_cpu1(PM_POWER_MODULE_NAME_CPU1);
     }
     else //power down
     {

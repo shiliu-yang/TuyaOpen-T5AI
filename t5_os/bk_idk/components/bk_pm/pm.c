@@ -586,7 +586,7 @@ bk_err_t bk_pm_module_vote_power_ctrl(pm_power_module_name_e module, pm_power_mo
 			s_pm_audio_pm_state |= 0x1 << (module % (PM_POWER_MODULE_NAME_AUDP * PM_MODULE_SUB_POWER_DOMAIN_MAX));
 			s_pm_off_modules &= ~(0x1 << PM_POWER_MODULE_NAME_AUDP);
 			s_pm_on_modules |= 0x1 << PM_POWER_MODULE_NAME_AUDP;
-			s_pm_sleeped_modules &= ~(0x1 << PM_POWER_MODULE_NAME_AUDP);
+			s_pm_sleeped_modules &= ~(0x1ULL << PM_POWER_MODULE_NAME_AUDP);
 			GLOBAL_INT_RESTORE();
 
 			if (s_pm_cp1_auto_power_down_flag)
@@ -620,7 +620,7 @@ bk_err_t bk_pm_module_vote_power_ctrl(pm_power_module_name_e module, pm_power_mo
 			s_pm_video_pm_state |= 0x1 << (module % (PM_POWER_MODULE_NAME_VIDP * PM_MODULE_SUB_POWER_DOMAIN_MAX));
 			s_pm_off_modules &= ~(0x1 << PM_POWER_MODULE_NAME_VIDP);
 			s_pm_on_modules |= 0x1 << PM_POWER_MODULE_NAME_VIDP;
-			s_pm_sleeped_modules &= ~(0x1 << PM_POWER_MODULE_NAME_VIDP);
+			s_pm_sleeped_modules &= ~(0x1ULL << PM_POWER_MODULE_NAME_VIDP);
 			GLOBAL_INT_RESTORE();
 
 			if (s_pm_cp1_auto_power_down_flag)
@@ -642,7 +642,8 @@ bk_err_t bk_pm_module_vote_power_ctrl(pm_power_module_name_e module, pm_power_mo
 			}
 		}
 		else if ((module == PM_POWER_SUB_MODULE_NAME_PHY_BT)
-			|| (module == PM_POWER_SUB_MODULE_NAME_PHY_WIFI))
+			|| (module == PM_POWER_SUB_MODULE_NAME_PHY_WIFI)
+			|| (module == PM_POWER_SUB_MODULE_NAME_PHY_RF))
 		{
 			GLOBAL_INT_DISABLE();
 			s_pm_phy_pm_state |= 0x1 << (module % (PM_POWER_MODULE_NAME_PHY * PM_MODULE_SUB_POWER_DOMAIN_MAX));
@@ -658,21 +659,29 @@ bk_err_t bk_pm_module_vote_power_ctrl(pm_power_module_name_e module, pm_power_mo
 				sys_drv_module_power_ctrl(PM_POWER_MODULE_NAME_PHY, power_state);
 				if (0x0 == sys_drv_module_power_state_get(PM_POWER_MODULE_NAME_PHY))
 				{
-#if CONFIG_SYSTEM_CTRL
+					if(PM_POWER_SUB_MODULE_NAME_PHY_RF != module)
+					{
 #if CONFIG_WIFI_ENABLE
-					extern void phy_wakeup_reinit();
-					phy_wakeup_reinit();
+						 extern void phy_wakeup_reinit(uint8 is_wifi);
+						 phy_wakeup_reinit(module == PM_POWER_SUB_MODULE_NAME_PHY_WIFI);
 #else
-					extern void phy_wakeup_for_bluetooth();
-					phy_wakeup_for_bluetooth();
+						 extern void phy_wakeup_for_bluetooth();
+						 phy_wakeup_for_bluetooth();
 #endif
-					s_pm_is_phy_reinit_flag = true;
-#endif
-					GLOBAL_INT_DISABLE();
-					s_pm_phy_calibration_state = 0x1;
-					s_pm_off_modules &= ~(0x1 << PM_POWER_MODULE_NAME_PHY);
-					s_pm_on_modules |= 0x1 << PM_POWER_MODULE_NAME_PHY;
-					GLOBAL_INT_RESTORE();
+						 s_pm_is_phy_reinit_flag = true;
+						 GLOBAL_INT_DISABLE();
+						 s_pm_phy_calibration_state = 0x1;
+						 s_pm_off_modules &= ~(0x1 << PM_POWER_MODULE_NAME_PHY);
+						 s_pm_on_modules |= 0x1 << PM_POWER_MODULE_NAME_PHY;
+						 GLOBAL_INT_RESTORE();
+					} 
+					else
+					{
+						 GLOBAL_INT_DISABLE();
+						 s_pm_off_modules &= ~(0x1 << PM_POWER_MODULE_NAME_PHY);
+						 s_pm_on_modules |= 0x1 << PM_POWER_MODULE_NAME_PHY;
+						 GLOBAL_INT_RESTORE();
+					}
 				}
 				else
 				{
@@ -694,7 +703,7 @@ bk_err_t bk_pm_module_vote_power_ctrl(pm_power_module_name_e module, pm_power_mo
 			GLOBAL_INT_DISABLE();
 			s_pm_off_modules &= ~(0x1 << PM_POWER_MODULE_NAME_BTSP);
 			s_pm_on_modules |= 0x1 << PM_POWER_MODULE_NAME_BTSP;
-			s_pm_sleeped_modules &= ~(0x1 << PM_POWER_MODULE_NAME_BTSP);
+			s_pm_sleeped_modules &= ~(0x1ULL << PM_POWER_MODULE_NAME_BTSP);
 			GLOBAL_INT_RESTORE();
 		}
 		else
@@ -775,7 +784,7 @@ bk_err_t bk_pm_module_vote_power_ctrl(pm_power_module_name_e module, pm_power_mo
 				sys_drv_module_power_ctrl(PM_POWER_MODULE_NAME_AUDP, power_state);
 				s_pm_off_modules |= 0x1 << PM_POWER_MODULE_NAME_AUDP;
 				s_pm_on_modules &= ~(0x1 << PM_POWER_MODULE_NAME_AUDP);
-				s_pm_sleeped_modules |= (0x1 << PM_POWER_MODULE_NAME_AUDP);
+				s_pm_sleeped_modules |= (0x1ULL << PM_POWER_MODULE_NAME_AUDP);
 			}
 			GLOBAL_INT_RESTORE();
 		}
@@ -797,12 +806,13 @@ bk_err_t bk_pm_module_vote_power_ctrl(pm_power_module_name_e module, pm_power_mo
 				sys_drv_module_power_ctrl(PM_POWER_MODULE_NAME_VIDP, power_state);
 				s_pm_off_modules |= 0x1 << PM_POWER_MODULE_NAME_VIDP;
 				s_pm_on_modules &= ~(0x1 << PM_POWER_MODULE_NAME_VIDP);
-				s_pm_sleeped_modules |= (0x1 << PM_POWER_MODULE_NAME_VIDP);
+				s_pm_sleeped_modules |= (0x1ULL << PM_POWER_MODULE_NAME_VIDP);
 			}
 			GLOBAL_INT_RESTORE();
 		}
 		else if ((module == PM_POWER_SUB_MODULE_NAME_PHY_BT)
-			|| (module == PM_POWER_SUB_MODULE_NAME_PHY_WIFI))
+			|| (module == PM_POWER_SUB_MODULE_NAME_PHY_WIFI)
+			|| (module == PM_POWER_SUB_MODULE_NAME_PHY_RF))
 		{
 			GLOBAL_INT_DISABLE();
 			s_pm_phy_pm_state &= ~(0x1 << (module % (PM_POWER_MODULE_NAME_PHY * PM_MODULE_SUB_POWER_DOMAIN_MAX)));
@@ -930,6 +940,9 @@ static bk_err_t pm_psram_malloc_state_and_power_ctrl()
 	{
 		bk_pm_module_vote_psram_ctrl(PM_POWER_PSRAM_MODULE_NAME_AS_MEM,PM_POWER_MODULE_STATE_OFF);
 		bk_pm_module_vote_power_ctrl(PM_POWER_SUB_MODULE_NAME_AHBP_PSRAM, PM_POWER_MODULE_STATE_OFF);
+		#if CONFIG_CP1_POWER_ON_WHEN_LV
+		bk_pm_module_vote_psram_ctrl(PM_POWER_PSRAM_MODULE_NAME_MEDIA, PM_POWER_MODULE_STATE_OFF);//application call more reasonable
+		#endif
 	}
 
   #endif
@@ -1025,7 +1038,7 @@ bk_err_t bk_pm_module_vote_sleep_ctrl(pm_sleep_module_name_e module, uint32_t sl
 		else if (module == PM_SLEEP_MODULE_NAME_APP)
 		{
 		}
-		s_pm_sleeped_modules &= ~(0x1 << module);
+		s_pm_sleeped_modules &= ~(0x1ULL << module);
 	}
 	if (s_debug_en & 0x1)
 		os_printf("pm sleep state 0x%llX 0x%x %d\r\n", s_pm_sleeped_modules, s_pm_on_modules, module);
@@ -1033,6 +1046,11 @@ bk_err_t bk_pm_module_vote_sleep_ctrl(pm_sleep_module_name_e module, uint32_t sl
 
 	return BK_OK;
 #endif
+}
+
+int32_t bk_pm_module_sleep_state_get(pm_sleep_module_name_e module)
+{
+	return !!(s_pm_sleeped_modules & (0x1ULL << module));
 }
 
 bk_err_t bk_pm_sleep_mode_set(pm_sleep_mode_e sleep_mode)
@@ -1173,28 +1191,28 @@ static void pm_check_power_on_module()
 
 	if (!(s_pm_on_modules & ((0x1 << PM_POWER_MODULE_NAME_BTSP)))) // when the module not power on , set the module sleep state
 	{
-		s_pm_sleeped_modules |= 0x1 << PM_POWER_MODULE_NAME_BTSP;
+		s_pm_sleeped_modules |= 0x1ULL << PM_POWER_MODULE_NAME_BTSP;
 		s_pm_off_modules |= 0x1 << PM_POWER_MODULE_NAME_BTSP;
 		// os_printf("bt not power on \r\n");
 	}
 
 	if (!(s_pm_on_modules & (0x1 << PM_POWER_MODULE_NAME_WIFIP_MAC))) // when the module not power on , set the module sleep state
 	{
-		s_pm_sleeped_modules |= 0x1 << PM_POWER_MODULE_NAME_WIFIP_MAC;
+		s_pm_sleeped_modules |= 0x1ULL << PM_POWER_MODULE_NAME_WIFIP_MAC;
 		s_pm_off_modules |= 0x1 << PM_POWER_MODULE_NAME_WIFIP_MAC;
 		// os_printf("wifi not power on \r\n");
 	}
 
 	if (!(s_pm_on_modules & (0x1 << PM_POWER_MODULE_NAME_AUDP))) // when the module not power on , set the module sleep state
 	{
-		s_pm_sleeped_modules |= 0x1 << PM_POWER_MODULE_NAME_AUDP;
+		s_pm_sleeped_modules |= 0x1ULL << PM_POWER_MODULE_NAME_AUDP;
 		s_pm_off_modules |= 0x1 << PM_POWER_MODULE_NAME_AUDP;
 		// os_printf("audio not power on \r\n");
 	}
 
 	if (!(s_pm_on_modules & (0x1 << PM_POWER_MODULE_NAME_VIDP))) // when the module not power on , set the module sleep state
 	{
-		s_pm_sleeped_modules |= 0x1 << PM_POWER_MODULE_NAME_VIDP;
+		s_pm_sleeped_modules |= 0x1ULL << PM_POWER_MODULE_NAME_VIDP;
 		s_pm_off_modules |= 0x1 << PM_POWER_MODULE_NAME_VIDP;
 		// os_printf("video not power on \r\n");
 	}
@@ -1245,7 +1263,7 @@ void pm_rf_switch(pm_power_module_name_e name)
 {
 }
 
-int32 bk_pm_module_power_state_get(pm_power_module_name_e module)
+int32_t bk_pm_module_power_state_get(pm_power_module_name_e module)
 {
 	if ( (module == PM_POWER_SUB_MODULE_NAME_BAKP_TIMER1)
 		|| (module == PM_POWER_SUB_MODULE_NAME_BAKP_UART1)

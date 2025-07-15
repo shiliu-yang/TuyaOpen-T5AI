@@ -192,6 +192,28 @@ static void spi_init_gpio(spi_id_t id)
 #endif
 }
 
+bk_err_t bk_spi_set_role(spi_id_t id, spi_role_t role)
+{
+	if(role == SPI_ROLE_SLAVE) {
+		spi_hal_set_role_slave(&s_spi[id].hal);
+	} else {
+		spi_hal_set_role_master(&s_spi[id].hal);
+	}
+	return BK_OK;
+}
+
+bk_err_t bk_spi_clear_tx_fifo(spi_id_t id)
+{
+	spi_hal_clear_tx_fifo(&s_spi[id].hal);
+	return BK_OK;
+}
+
+bk_err_t bk_spi_clear_rx_fifo(spi_id_t id)
+{
+	spi_hal_clear_rx_fifo(&s_spi[id].hal);
+	return BK_OK;
+}
+
 #if (CONFIG_SYSTEM_CTRL)
 static void spi_clock_enable(spi_id_t id)
 {
@@ -823,7 +845,6 @@ bk_err_t bk_spi_clr_tx(spi_id_t id)
 {
     spi_hal_disable_tx_fifo_int(&s_spi[id].hal);
     spi_hal_disable_tx(&s_spi[id].hal);
-
     return BK_OK;
 }
 
@@ -896,7 +917,9 @@ bk_err_t bk_spi_read_bytes_async(spi_id_t id, void *data, uint32_t size)
 	return BK_OK;
 }
 
+
 #if CONFIG_SPI_DMA
+
 static bk_err_t spi_duplex_tx_rx_enable(spi_id_t id)
 {
 	bk_dma_start(s_spi[id].spi_tx_dma_chan);
@@ -960,6 +983,13 @@ bk_err_t bk_spi_dma_duplex_xfer(spi_id_t id, const void *tx_data, uint32_t tx_si
 
 		rtos_get_semaphore(&s_spi[id].tx_sema, BEKEN_NEVER_TIMEOUT);
 		rtos_get_semaphore(&s_spi[id].rx_sema, BEKEN_NEVER_TIMEOUT);
+
+// Modified by TUYA Start
+#if CONFIG_CACHE_ENABLE
+		extern void flush_all_dcache(void);
+		flush_all_dcache();
+#endif
+// Modified by TUYA End
 
 		int_level = spi_enter_critical();
 		spi_hal_disable_rx(&s_spi[id].hal);
@@ -1045,6 +1075,7 @@ bk_err_t bk_spi_dma_write_bytes_async(spi_id_t id, const void *data, uint32_t si
 		SPI_LOGE("size is too large, size = 0x%x\r\n", size);
 		return BK_FAIL;
 	}
+    bk_printf("spi test trace %s %d\r\n", __func__, __LINE__);
 	int32_t left_len = size;
 	uint32_t tx_len = 0;
 	uint32_t buf_offset = 0;
@@ -1094,6 +1125,7 @@ bk_err_t bk_spi_dma_write_bytes_async(spi_id_t id, const void *data, uint32_t si
 		buf_offset += tx_len;
 	}
 
+    bk_printf("spi test trace %s %d\r\n", __func__, __LINE__);
 	return BK_OK;
 }
 // Modified by TUYA End
@@ -1149,6 +1181,7 @@ bk_err_t bk_spi_dma_read_bytes_async(spi_id_t id, void *data, uint32_t size)
 		return BK_FAIL;
 	}
 
+    bk_printf("spi test trace %s %d\r\n", __func__, __LINE__);
 	int32_t left_len = size;
 	uint32_t rx_len = 0;
 	uint32_t buf_offset = 0;
@@ -1157,7 +1190,7 @@ bk_err_t bk_spi_dma_read_bytes_async(spi_id_t id, void *data, uint32_t size)
 		rx_len = (left_len < SPI_MAX_LENGTH)? left_len : SPI_MAX_LENGTH;
 		uint32_t int_level = spi_enter_critical();
 		s_current_spi_dma_rd_id = id;
-		s_spi[id].is_rx_blocked = true;
+		s_spi[id].is_rx_blocked = false;
 
 		//set spi trans_len as 0, to increase max trans_len from 4096(spi max length) to 65536(dma max length).
 		spi_hal_set_rx_trans_len(&s_spi[id].hal, 0);
@@ -1180,6 +1213,7 @@ bk_err_t bk_spi_dma_read_bytes_async(spi_id_t id, void *data, uint32_t size)
 		buf_offset += rx_len;
 	}
 
+    bk_printf("spi test trace %s %d\r\n", __func__, __LINE__);
 	return BK_OK;
 }
 // Modified by TUYA End
@@ -1236,7 +1270,6 @@ static void spi_isr_common(spi_id_t id)
 			}
 			s_spi[id].rx_offset = rd_offset;
 		}
-
 		bk_spi_clr_rx(id);
 		if (s_spi_rx_finish_isr[id].callback){
 			s_spi_rx_finish_isr[id].callback(s_current_spi_dma_rd_id,s_spi_rx_finish_isr[id].param);

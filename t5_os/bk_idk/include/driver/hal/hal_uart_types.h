@@ -136,6 +136,7 @@ typedef struct {
 	 * 4. Does not support UART TX DMA,because UART TX data isn't too large and CPU speed is enough.
 	 */
 	uart_dma_enable_t rx_dma_en;
+	uart_dma_enable_t tx_dma_en;
 #endif
 } uart_config_t;
 

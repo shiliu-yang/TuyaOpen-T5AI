@@ -177,6 +177,7 @@ struct bt_osi_funcs_t
 
     void (*_ble_enter_dut)(void);
     void (*_ble_exit_dut)(void);
+    uint8_t (*_support_lpo_rosc)(void);
 };
 
 int bt_os_adapter_init(void *osi_funcs);

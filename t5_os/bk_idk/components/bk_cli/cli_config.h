@@ -44,6 +44,8 @@ extern "C" {
 
 #define CLI_CFG_MISC        1
 #define CLI_CFG_MEM         1
+#define CLI_CFG_DWT         1
+#define CLI_CFG_FPB         1
 
 #if (CONFIG_WIFI_CLI_ENABLE &&(CONFIG_SYS_CPU0))
 #define CLI_CFG_PHY         1

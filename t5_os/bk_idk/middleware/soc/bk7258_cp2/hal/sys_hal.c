@@ -59,6 +59,10 @@ void sys_hal_usb_analog_phy_en(bool en)
 /** Platform PWM Start **/
 
 /** Platform PWM End **/
+void sys_hal_set_ana_reg_spi_latch1v(uint32_t v)
+{
+	sys_ll_set_ana_reg9_spi_latch1v(v);
+}
 
 void sys_hal_flash_set_dco(void)
 {
@@ -126,7 +130,7 @@ void sys_hal_module_power_ctrl(power_module_name_t module,power_module_state_t p
 			sys_ll_set_cpu1_int_halt_clk_op_cpu1_pwr_dw(POWER_MODULE_STATE_OFF);
 		}
 	} else if(module == POWER_MODULE_NAME_TCM1_PGEN) {
-		if(power_state == POWER_MODULE_STATE_ON) {
+		if(power_state == POWER_MODULE_STATE_ON) {		
 			/*TODO
 			  sys_ll_set_cpu_power_sleep_wakeup_tcm1_pgen(0);*/
 			while(1){;}
@@ -2237,12 +2241,10 @@ void sys_hal_set_ana_cb_cal_manu(uint32_t value)
     sys_ll_set_ana_reg5_bcal_en(value);
 }
 
-// Modified by TUYA Start
 void sys_hal_set_ana_adc_div(uint32_t value)
 {
     sys_ll_set_ana_reg5_adc_div(value);
 }
-// Modified by TUYA End
 
 void sys_hal_set_ana_cb_cal_trig(uint32_t value)
 {

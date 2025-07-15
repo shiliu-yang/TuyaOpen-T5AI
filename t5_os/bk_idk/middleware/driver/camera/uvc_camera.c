@@ -30,7 +30,6 @@
 #include "gpio_driver.h"
 // Modified by TUYA Start
 #include "gpio_map.h"
-#include "tkl_video_in.h"
 // Modified by TUYA End
 #include "bk_misc.h"
 #include <modules/pm.h>
@@ -227,6 +226,15 @@ static void uvc_camera_eof_handle(uint32_t idx_uvc)
 {
 	// frame_buffer complete
 	UVC_JPEG_EOF_ENTRY();
+	if (uvc_camera_config_ptr->device.uvc_device[idx_uvc].mode == JPEG_MODE)
+	{
+		if (curr_frame_buffer->frame[0] != 0xFF || curr_frame_buffer->frame[1] != 0xD8
+			|| curr_frame_buffer->frame[curr_frame_buffer->length - 2] != 0xFF
+			|| curr_frame_buffer->frame[curr_frame_buffer->length - 1] != 0xD9)
+		{
+			curr_frame_buffer->length = 0;
+		}
+	}
 
 	if (uvc_camera_drv[idx_uvc]->packet_err || curr_frame_buffer->length == 0)
 	{
@@ -402,31 +410,28 @@ static void uvc_camera_process_payload(uint8_t *curptr, uint32_t newlen, uint32_
 	}
 
 	UVC_LOGD("length:%d-%d %02x-%02x-%02x-%02x-%02x-%02x\r\n", data_len, curr_frame_buffer->length, data[0], data[1], data[2], data[3], data[4], data[5]);
-	if (uvc_camera_drv[idx_uvc]->transfer_mode != USB_ENDPOINT_BULK_TRANSFER)
+	if (uvc_camera_config_ptr->device.uvc_device[idx_uvc].mode == JPEG_MODE)
 	{
-		if (uvc_camera_config_ptr->device.uvc_device[idx_uvc].mode == JPEG_MODE)
+		if (data[0] == 0xFF && data[1] == 0xD8)
 		{
-			if (data[0] == 0xFF && data[1] == 0xD8)
-			{
-				if (uvc_camera_drv[idx_uvc]->packet_err)
-				{
-					uvc_camera_drv[idx_uvc]->packet_err = false;
-					media_debug->uvc_error++;
-					uvc_camera_drv[idx_uvc]->error_packet_cnt++;
-				}
-				uvc_camera_drv[idx_uvc]->eof = false;
-				curr_frame_buffer->length = 0;
-			}
-		}
-		else
-		{
-			// for h264
-			if (data[0] == 0 && data[1] == 0 && data[2] == 0 && data[3] == 1)
+			if (uvc_camera_drv[idx_uvc]->packet_err)
 			{
 				uvc_camera_drv[idx_uvc]->packet_err = false;
-				uvc_camera_drv[idx_uvc]->eof = false;
-				curr_frame_buffer->length = 0;
+				media_debug->uvc_error++;
+				uvc_camera_drv[idx_uvc]->error_packet_cnt++;
 			}
+			uvc_camera_drv[idx_uvc]->eof = false;
+			curr_frame_buffer->length = 0;
+		}
+	}
+	else
+	{
+		// for h264
+		if (data[0] == 0 && data[1] == 0 && data[2] == 0 && data[3] == 1)
+		{
+			uvc_camera_drv[idx_uvc]->packet_err = false;
+			uvc_camera_drv[idx_uvc]->eof = false;
+			curr_frame_buffer->length = 0;
 		}
 	}
 
@@ -1516,7 +1521,7 @@ int bk_uvc_camera_jpeg_frame_check_eof(uint8_t *data, uint32_t length)
 		return ret;
 	}
 
-	for (uint32_t i = length - 1; i > 1 && max_length > 0; i++)
+	for (uint32_t i = length - 1; i > 1 && max_length > 0; i--)
 	{
 		if (data[i] == 0xD9 && data[i - 1] == 0xFF)
 		{

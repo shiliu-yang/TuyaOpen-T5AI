@@ -332,6 +332,8 @@ bk_err_t bk_gpio_register_isr(gpio_id_t gpio_id, gpio_isr_t isr)
 bk_err_t bk_gpio_enable_interrupt(gpio_id_t gpio_id)
 {
 	GPIO_RETURN_ON_INVALID_ID(gpio_id);
+	//Before enable the interrupt,wait for the internal stability of the chip
+	for (volatile int i = 0; i < 1000; i++);    
 
 	return gpio_hal_enable_interrupt(&s_gpio.hal, gpio_id);
 }
@@ -698,7 +700,9 @@ static void gpio_config_wakeup_function(void)
 		if(s_gpio_dynamic_wakeup_source_map[i].id != GPIO_WAKE_SOURCE_IDLE_ID) {
 			//maybe the PIN is re-used as SECOND_FUNCTION and GPIO,F.E:UART RXD re-uses as wakeup PIN
 			gpio_hal_func_unmap(hal, s_gpio_dynamic_wakeup_source_map[i].id);
-			gpio_wakeup_set_pin_voltage_status(s_gpio_dynamic_wakeup_source_map[i].id, s_gpio_dynamic_wakeup_source_map[i].int_type);
+			// Modified by TUYA Start
+			//gpio_wakeup_set_pin_voltage_status(s_gpio_dynamic_wakeup_source_map[i].id, s_gpio_dynamic_wakeup_source_map[i].int_type);
+			// Modified by TUYA End
 			bk_gpio_set_interrupt_type(s_gpio_dynamic_wakeup_source_map[i].id, s_gpio_dynamic_wakeup_source_map[i].int_type);
 			//bk_gpio_enable_interrupt(s_gpio_dynamic_wakeup_source_map[i].id);
 			wakeup_id |= (uint64_t)0x1<<s_gpio_dynamic_wakeup_source_map[i].id;

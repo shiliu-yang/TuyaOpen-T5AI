@@ -147,7 +147,9 @@ typedef struct QueueDefinition   * QueueSetMemberHandle_t;
  */
 #if ( configSUPPORT_DYNAMIC_ALLOCATION == 1 )
     #define xQueueCreate( uxQueueLength, uxItemSize )    xQueueGenericCreate( ( uxQueueLength ), ( uxItemSize ), ( queueQUEUE_TYPE_BASE ) )
+	// Modified by TUYA Start
     #define xQueueCreate_in_Psram( uxQueueLength, uxItemSize )    xQueueGenericCreate_in_Psram( ( uxQueueLength ), ( uxItemSize ), ( queueQUEUE_TYPE_BASE ) )
+	// Modified by TUYA End
 #endif
 
 /**
@@ -1550,9 +1552,11 @@ BaseType_t xQueueGiveMutexRecursive( QueueHandle_t xMutex ) PRIVILEGED_FUNCTION;
     QueueHandle_t xQueueGenericCreate( const UBaseType_t uxQueueLength,
                                        const UBaseType_t uxItemSize,
                                        const uint8_t ucQueueType ) PRIVILEGED_FUNCTION;
+	// Modified by TUYA Start
     QueueHandle_t xQueueGenericCreate_in_Psram( const UBaseType_t uxQueueLength,
                                                 const UBaseType_t uxItemSize,
                                                 const uint8_t ucQueueType ) PRIVILEGED_FUNCTION;
+	// Modified by TUYA End
 #endif
 
 /*

@@ -209,7 +209,7 @@ UINT32 rwm_get_rx_free_node(uint32_t *host_id, int len)
 #if MEM_TRX_DYNAMIC_EN
 	pbuf_type type = PBUF_RAM_RX;
 #else
-	pbuf_type type = PBUF_RAM; // PBUF_POOL;
+	pbuf_type type = PBUF_RAM; // PBUF_POOL;  Modified by TUYA
 
 	/*
 	 * When requested pbuf type is PBUF_POOL, pbuf_alloc will return a valid memory address even the
@@ -516,7 +516,7 @@ void rwnx_upload_amsdu(struct fhost_rx_header *rxhdr)
 	// upload the other sub-MSDUs of A-MSDU
 	q = (struct pbuf *)(amsdu_hostids[i]);
 
-	while (q && i < NX_MAX_MSDU_PER_RX_AMSDU) {
+	while (q) {
 		#if NX_VERSION > NX_VERSION_PACK(6, 22, 0, 0)
 		/* preprocess for pbuf */
 		rwnx_rx_preprocess(iface, q);
@@ -532,7 +532,11 @@ void rwnx_upload_amsdu(struct fhost_rx_header *rxhdr)
 		}
 
 		/* get the next sub-MSDU */
-		q = (struct pbuf *)(amsdu_hostids[++i]);
+		i++;
+		if(i < NX_MAX_MSDU_PER_RX_AMSDU)
+			q = (struct pbuf *)(amsdu_hostids[i]);
+		else
+			break;
 	}
 }
 

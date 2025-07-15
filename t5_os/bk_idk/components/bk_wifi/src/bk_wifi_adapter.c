@@ -48,8 +48,6 @@
 #include "reg_domain.h"
 #include "bk_rw.h"
 
-#include "common/bk_generic.h"
-
 #if (CONFIG_CKMN)
 #include <driver/rosc_32k.h>
 #endif
@@ -136,6 +134,22 @@ int bk_get_pbuf_pool_size_wrapper()
 #else
 	return PBUF_POOL_BUFSIZE;
 #endif
+}
+
+bool bk_pbuf_check_overflow_wrapper(void *_p, uint32_t buf)
+{
+	struct pbuf *p = _p;
+
+	// if pbuf payload directly follows pbuf, check overflow after
+	// 802.3 frame is coverted to 802.11 hdr.
+	if (p && (p->type_internal & PBUF_TYPE_FLAG_STRUCT_DATA_CONTIGUOUS)) {
+		if ((uint32_t)(p + 1) > buf) {
+			BK_LOGE(TAG, "pbuf overflow, check PBUF settings\n");
+			BK_ASSERT(0);
+			return true;
+		}
+	}
+	return false;
 }
 
 void *bk_get_netif_hostname_wrapper(void *netif)
@@ -409,6 +423,31 @@ static void wifi_vote_rf_ctrl_wrapper(uint8_t cmd)
     rf_module_vote_ctrl(cmd,RF_BY_WIFI_BIT);
 }
 
+static void wifi_phy_clk_open_wrapper(uint8_t is_wifi)
+{
+    if(is_wifi)
+    {
+        phy_clk_open_handler(RF_BY_WIFI_BIT);
+    }
+    else
+    {
+        phy_clk_open_handler(RF_BY_BLE_BIT);
+    }
+    
+}
+
+static void wifi_phy_clk_close_wrapper(uint8_t is_wifi)
+{
+    if(is_wifi)
+    {
+        phy_clk_close_handler(RF_BY_WIFI_BIT);
+    }
+    else
+    {
+        phy_clk_close_handler(RF_BY_BLE_BIT);
+    }
+}
+
 static void wifi_mac_phy_power_on_wrapper(void)
 {
 	//enable mac and phy power
@@ -425,6 +464,15 @@ static bk_err_t bk_rosc_32k_get_ppm_wrapper(void)
 {
 	#if (CONFIG_CKMN)
 	return bk_rosc_32k_get_ppm();
+	#else
+	return BK_OK;
+	#endif
+}
+
+static double bk_rosc_32k_get_freq_wrapper(void)
+{
+	#if (CONFIG_CKMN)
+	return bk_rosc_32k_get_freq();
 	#else
 	return BK_OK;
 	#endif
@@ -1131,7 +1179,7 @@ static void register_wifi_dump_hook_wrapper(void *wifi_func)
 
 static void bk_airkiss_start_udp_boardcast_wrapper(u8 random_data)
 {
-    // TODO
+    // TODO Modified by TUYA Start
 #if 0
 	int err, i;
 	int udp_broadcast_fd = -1;
@@ -1162,6 +1210,7 @@ static void bk_airkiss_start_udp_boardcast_wrapper(u8 random_data)
 	BK_LOGD(TAG, "close socket\r\n");
 	close(udp_broadcast_fd);
 #endif
+    // Modified by TUYA End
 }
 
 static void tx_verify_test_call_back_wrapper(void)
@@ -1263,6 +1312,7 @@ __attribute__((section(".dtcm_sec_data "))) wifi_os_funcs_t g_wifi_os_funcs = {
 	._pbuf_cat = bk_pbuf_cat_wrapper,
 	._get_rx_pbuf_type = bk_get_rx_pbuf_type_wrapper,
 	._get_pbuf_pool_size = bk_get_pbuf_pool_size_wrapper,
+	._pbuf_check_overflow = bk_pbuf_check_overflow_wrapper,
 	._get_netif_hostname = bk_get_netif_hostname_wrapper,
 	._save_net_info = bk_save_net_info_wrapper,
 	._get_net_info = bk_get_net_info_wrapper,
@@ -1307,6 +1357,8 @@ __attribute__((section(".dtcm_sec_data "))) wifi_os_funcs_t g_wifi_os_funcs = {
 	._bk_pm_sleep_register = bk_pm_sleep_register_wrapper,
 	._bk_pm_low_voltage_register = bk_pm_low_voltage_register_wrapper,
 	._wifi_vote_rf_ctrl = wifi_vote_rf_ctrl_wrapper,
+	._wifi_phy_clk_open = wifi_phy_clk_open_wrapper,
+	._wifi_phy_clk_close = wifi_phy_clk_close_wrapper,
 	._wifi_mac_phy_power_on = wifi_mac_phy_power_on_wrapper,
 	._mac_ps_exc32_cb_notify = mac_ps_exc32_cb_notify_wrapper,
 	._mac_ps_exc32_init = mac_ps_exc32_init_wrapper,
@@ -1316,6 +1368,7 @@ __attribute__((section(".dtcm_sec_data "))) wifi_os_funcs_t g_wifi_os_funcs = {
 	._rwnx_cal_mac_sleep_rc_clr = rwnx_cal_mac_sleep_rc_clr_wrapper,
 	._rwnx_cal_mac_sleep_rc_recover = rwnx_cal_mac_sleep_rc_recover_wrapper,
 	._bk_rosc_32k_get_ppm = bk_rosc_32k_get_ppm_wrapper,
+	._bk_rosc_32k_get_freq = bk_rosc_32k_get_freq_wrapper,
 	._bk_rosc_32k_get_time_diff = bk_rosc_32k_get_time_diff_wrapper,
 	._mac_printf_encode = mac_printf_encode_wrapper,
 	._dbg_enable_debug_gpio = dbg_enable_debug_gpio_wrapper,
