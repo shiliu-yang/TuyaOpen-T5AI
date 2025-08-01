@@ -162,7 +162,8 @@ void USBH_IRQHandler(void);//#define USBH_IRQHandler USB_INT_Handler
 #define USB_FIFO_BASE(ep_idx) (USB_BASE + MUSB_FIFO_OFFSET + 0x4 * ep_idx)
 
 #ifndef CONIFG_USB_MUSB_PIPE_NUM
-#define CONIFG_USB_MUSB_PIPE_NUM 8
+// #define CONIFG_USB_MUSB_PIPE_NUM 8
+#define CONIFG_USB_MUSB_PIPE_NUM 16
 #endif
 
 #if CONFIG_USB_DMA_ENABLE
@@ -1571,7 +1572,7 @@ void USBH_IRQHandler(void)
     HWREGB(USB_BASE + MUSB_IS_OFFSET) = is;
 
     old_ep_idx = musb_get_active_ep();
-    USB_LOG_DBG("%s is: 0x%x txis: 0x%x rxis:0x%x dmais:0x%x\r\n", __func__, is, txis, rxis, dmais);
+    // USB_LOG_DBG("%s is: 0x%x txis: 0x%x rxis:0x%x dmais:0x%x\r\n", __func__, is, txis, rxis, dmais);
 
     if ((is & USB_IS_DISCON) || (is & USB_IS_BABBLE)) {
         usbh_roothub_thread_send_queue(1, (void *)usbh_musb_disconnect_set_status);

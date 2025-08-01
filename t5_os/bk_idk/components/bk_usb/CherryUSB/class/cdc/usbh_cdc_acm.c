@@ -343,6 +343,129 @@ static int usbh_cdc_data_disconnect(struct usbh_hubport *hport, uint8_t intf)
     return ret;
 }
 
+static int usbh_ml307r_connect(struct usbh_hubport *hport, uint8_t intf)
+{
+
+	uint8_t cur_iface       = 0xFF; __maybe_unused_var(cur_iface);
+	uint8_t cur_alt_setting = 0xFF; __maybe_unused_var(cur_alt_setting);
+	uint8_t cur_iClass      = 0xFF; __maybe_unused_var(cur_iClass);
+	uint8_t cur_nep         = 0;   __maybe_unused_var(cur_nep);
+	uint8_t idx = 0;
+
+    int ret;
+
+    USB_LOG_DBG("[+]%s\r\n", __func__);
+
+    struct usbh_cdc_acm *cdc_acm_class = usb_malloc(sizeof(struct usbh_cdc_acm));
+    if (cdc_acm_class == NULL) {
+        USB_LOG_ERR("Fail to alloc cdc_acm_class\r\n");
+        return -ENOMEM;
+    }
+
+    memset(cdc_acm_class, 0x00, sizeof(struct usbh_cdc_acm));
+    ret = usbh_cdc_acm_devno_alloc(cdc_acm_class);
+    if (ret < 0) {
+        USB_LOG_ERR("[-]%s, ret:%d\r\n", __func__, ret);
+        return ret;
+    }
+    cdc_acm_class->hport = hport;
+
+    cdc_acm_class->intf = intf;
+
+    hport->config.intf[intf].priv = cdc_acm_class;
+
+#ifdef CONFIG_USBHOST_CDC_ACM_NOTIFY   ///?????
+    ep_desc = &hport->config.intf[intf].altsetting[0].ep[0].ep_desc;
+    ep_cfg.ep_addr = ep_desc->bEndpointAddress;
+    ep_cfg.ep_type = ep_desc->bmAttributes & USB_ENDPOINT_TYPE_MASK;
+    ep_cfg.ep_mps = ep_desc->wMaxPacketSize;
+    ep_cfg.ep_interval = ep_desc->bInterval;
+    ep_cfg.hport = hport;
+    usbh_pipe_alloc(&cdc_acm_class->intin, &ep_cfg);
+#endif
+
+	uint8_t *p = hport->raw_config_desc;
+	while (p[DESC_bLength]) {
+		switch (p[DESC_bDescriptorType]) {
+			case USB_DESCRIPTOR_TYPE_INTERFACE:
+				cur_iface       = p[INTF_DESC_bInterfaceNumber];   // current interface number
+				cur_alt_setting = p[INTF_DESC_bAlternateSetting];
+				cur_iClass      = p[INTF_DESC_bInterfaceClass];    // current interface class
+				cur_nep         = p[INTF_DESC_bNumEndpoints];
+				break;
+			case USB_DESCRIPTOR_TYPE_ENDPOINT:
+				if (cur_iface == cdc_acm_class->intf && cur_nep!=0)
+				{
+					os_memcpy(&hport->config.intf[cur_iface].altsetting[0].ep[idx].ep_desc, &p[DESC_bLength], p[DESC_bLength]);
+					idx++;
+				}
+				break;
+			default:
+				break;
+		}
+		/* skip to next descriptor */
+		p += p[DESC_bLength];
+	}
+
+#if 0
+    struct usb_endpoint_descriptor * ep_desc;
+	{
+	    for (uint8_t i = 0; i < hport->config.intf[intf].altsetting[0].intf_desc.bNumEndpoints; i++) {
+	        ep_desc = &hport->config.intf[intf].altsetting[0].ep[i].ep_desc;
+	        if (ep_desc->bEndpointAddress & 0x80) {
+	            usbh_hport_activate_epx(&cdc_acm_class->bulkin, hport, ep_desc);
+	        } else {
+	            usbh_hport_activate_epx(&cdc_acm_class->bulkout, hport, ep_desc);
+	        }
+	    }
+      USB_LOG_INFO("Register CDC DATA Class:%s\r\n", hport->config.intf[intf].devname);
+	}
+#endif
+	snprintf(hport->config.intf[intf].devname, CONFIG_USBHOST_DEV_NAMELEN, DEV_FORMAT, cdc_acm_class->minor);
+
+    USB_LOG_DBG("[-]%s, cdc_acm_class: %p\r\n", __func__, cdc_acm_class);
+
+#if CONFIG_USB_CDC_MODEM
+	extern void bk_usb_cdc_connect_notify(struct usbh_hubport *hport, uint8_t intf, uint32_t class);
+	bk_usb_cdc_connect_notify(hport, intf, USB_DEVICE_CLASS_VEND_SPECIFIC);
+#endif
+	return ret;
+}
+
+
+static int usbh_ml307r_disconnect(struct usbh_hubport *hport, uint8_t intf)
+{
+#if CONFIG_USB_CDC_MODEM
+	extern void bk_usb_cdc_disconnect_notify(struct usbh_hubport *hport, uint8_t intf, uint32_t class);
+	bk_usb_cdc_disconnect_notify(hport, intf, USB_DEVICE_CLASS_CDC_DATA);
+#endif
+    int ret = 0;
+
+    struct usbh_cdc_acm *cdc_acm_class = (struct usbh_cdc_acm *)hport->config.intf[intf].priv;
+
+    if (cdc_acm_class) {
+        usbh_cdc_acm_devno_free(cdc_acm_class);
+
+        if (cdc_acm_class->bulkin) {
+            usbh_pipe_free(cdc_acm_class->bulkin);
+        }
+
+        if (cdc_acm_class->bulkout) {
+            usbh_pipe_free(cdc_acm_class->bulkout);
+        }
+
+        memset(cdc_acm_class, 0, sizeof(struct usbh_cdc_acm));
+        usb_free(cdc_acm_class);
+
+        if (hport->config.intf[intf].devname[0] != '\0')
+            USB_LOG_INFO("Unregister CDC DATA Class:%s\r\n", hport->config.intf[intf].devname);
+    }
+
+    return ret;
+}
+
+
+
 void bk_usbh_cdc_sw_init(struct usbh_hubport *hport, uint8_t interface_num, uint8_t interface_sub_class)
 {
 	if(!hport)
@@ -396,7 +519,7 @@ int32_t bk_usbh_cdc_sw_activate_epx(struct usbh_hubport *hport, struct usbh_cdc_
 		}
 	}
 	snprintf(hport->config.intf[intf].devname, CONFIG_USBHOST_DEV_NAMELEN, DEV_FORMAT, cdc_acm_class->minor);
-	USB_LOG_INFO("Register CDC DATA Class:%s\r\n", hport->config.intf[intf].devname);
+	USB_LOG_INFO("Register CDC DATA Class:%s, intf: %d, ret: %d\r\n", hport->config.intf[intf].devname, intf, ret);
 	return ret;
 }
 
@@ -437,7 +560,11 @@ const struct usbh_class_driver cdc_data_class_driver = {
     .connect     = usbh_cdc_data_connect,
     .disconnect  = usbh_cdc_data_disconnect
 };
-
+const struct usbh_class_driver ml307r_class_driver = {
+    .driver_name = "ml307r",
+    .connect     = usbh_ml307r_connect,
+    .disconnect  = usbh_ml307r_disconnect
+};
 
 CLASS_INFO_DEFINE const struct usbh_class_info cdc_acm_class_info = {
     .match_flags = USB_CLASS_MATCH_INTF_CLASS,
@@ -459,6 +586,17 @@ CLASS_INFO_DEFINE const struct usbh_class_info cdc_data_class_info = {
     .class_driver = &cdc_data_class_driver
 };
 
+// ASR Microelectronics
+// ML307R
+CLASS_INFO_DEFINE const struct usbh_class_info ml307r_class_info = {
+    .match_flags = (USB_CLASS_MATCH_VENDOR | USB_CLASS_MATCH_PRODUCT | USB_CLASS_MATCH_INTF_CLASS),
+    .class = USB_DEVICE_CLASS_VEND_SPECIFIC,
+    .subclass = 0x00,
+    .protocol = 0x00,
+    .vid = 0x2ECC,
+    .pid = 0x3012,
+    .class_driver = &ml307r_class_driver
+};
 
 void usbh_cdc_acm_class_register()
 {
@@ -467,6 +605,10 @@ void usbh_cdc_acm_class_register()
 void usbh_cdc_data_class_register()
 {
 	usbh_register_class_driver(0, (void *)&cdc_data_class_info);
+}
+void usbh_ml307r_class_register()
+{
+	usbh_register_class_driver(0, (void *)&ml307r_class_info);
 }
 
 int usbh_cdc_acm_bulk_in_transfer(struct usbh_cdc_acm *cdc_acm_class, uint8_t *buffer, uint32_t buflen, uint32_t timeout)

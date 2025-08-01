@@ -139,8 +139,10 @@ static void bk_usb_init_all_device_driver_sw(void)
 #if CONFIG_USB_CDC
 //	extern void usbh_cdc_acm_class_register();
 //	usbh_cdc_acm_class_register();
-	extern void usbh_cdc_data_class_register();
-	usbh_cdc_data_class_register();
+	// extern void usbh_cdc_data_class_register();
+	// usbh_cdc_data_class_register();
+	extern void usbh_ml307r_class_register();
+	usbh_ml307r_class_register();
 #endif
 }
 
@@ -1077,26 +1079,43 @@ bk_err_t bk_usb_close(void)
 	if(s_usb_driver_ops)
 		USB_RETURN_CLASS_IS_WORKING();
 
-	bk_err_t ret = BK_OK;
-	ret = bk_usb_drv_send_msg(USB_DRV_USB_CLOSE, NULL);
-
-#if !CONFIG_USB_MAILBOX
-	uint8_t wait_close_finish_count = 0;
-	while(s_usb_open_close_flag) {
-		if(wait_close_finish_count > 10)
-		{
-			USB_DRIVER_LOGE("[=]%s close timeout\r\n", __func__);
-			ret = BK_FAIL;
-			break;
-		}
-		rtos_delay_milliseconds(10);
-		wait_close_finish_count++;
-	}
-#endif
+	bk_err_t ret = BK_OK;
+
+	ret = bk_usb_drv_send_msg(USB_DRV_USB_CLOSE, NULL);
+
+
+
+#if !CONFIG_USB_MAILBOX
+
+	uint8_t wait_close_finish_count = 0;
+
+	while(s_usb_open_close_flag) {
+
+		if(wait_close_finish_count > 10)
+
+		{
+
+			USB_DRIVER_LOGE("[=]%s close timeout\r\n", __func__);
+
+			ret = BK_FAIL;
+
+			break;
+
+		}
+
+		rtos_delay_milliseconds(10);
+
+		wait_close_finish_count++;
+
+	}
+
+#endif
+
 // Modified by TUYA Start
     is_usb_opened = 0;
 // Modified by TUYA End
-	return ret;
+	return ret;
+
 
 }
 

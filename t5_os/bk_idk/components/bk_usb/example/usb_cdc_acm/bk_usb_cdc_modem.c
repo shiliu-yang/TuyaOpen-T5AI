@@ -169,7 +169,7 @@ void bk_cdc_acm_state_notify(CDC_STATUS_t * dev_state)
 	switch(state)
 	{
 		case CDC_STATUS_CONN:
-			LOGI("CDC_STATUS_CONN\n");
+			LOGI("CDC_STATUS_CONN, cnt: %d\n", dev_state->dev_cnt);
 			cdc_send_msg(CDC_STATUS_CONN, dev_state->dev_cnt);
 			break;
 		case CDC_STATUS_DISCON:
@@ -188,7 +188,9 @@ void bk_usb_cdc_rcv_notify_cp0(IPC_CDC_DATA_T *p)
 	{
 		case CPU1_UPDATE_USB_CDC_STATE:
 			{
+				LOGI("CPU1_UPDATE_USB_CDC_STATE, p_info: %p\n", p->p_info);
 				Multi_ACM_DEVICE_TOTAL_T * p_dbg = (Multi_ACM_DEVICE_TOTAL_T *)(p->p_info);
+				LOGI("dev_cnt: %d\n", p_dbg->p_status->dev_cnt);
 				bk_cdc_acm_state_notify(p_dbg->p_status);
 			}
 			break;

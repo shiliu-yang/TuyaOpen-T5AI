@@ -101,26 +101,31 @@ static const struct usbh_class_driver *usbh_find_class_driver(uint8_t class, uin
     for (index = usbh_class_info_table_begin; index < usbh_class_info_table_end; index++) {
         if ((index->match_flags & (USB_CLASS_MATCH_VENDOR | USB_CLASS_MATCH_PRODUCT | USB_CLASS_MATCH_INTF_CLASS | USB_CLASS_MATCH_INTF_SUBCLASS | USB_CLASS_MATCH_INTF_PROTOCOL)) ==
             (USB_CLASS_MATCH_VENDOR | USB_CLASS_MATCH_PRODUCT | USB_CLASS_MATCH_INTF_CLASS | USB_CLASS_MATCH_INTF_SUBCLASS | USB_CLASS_MATCH_INTF_PROTOCOL)) {
+	USB_LOG_DBG("[+]111%s\r\n", __func__);
             if (index->vid == vid && index->pid == pid &&
                 index->class == class && index->subclass == subclass && index->protocol == protocol) {
                 return index->class_driver;
             }
         } else if ((index->match_flags & (USB_CLASS_MATCH_INTF_CLASS | USB_CLASS_MATCH_INTF_SUBCLASS | USB_CLASS_MATCH_INTF_PROTOCOL)) ==
                    (USB_CLASS_MATCH_INTF_CLASS | USB_CLASS_MATCH_INTF_SUBCLASS | USB_CLASS_MATCH_INTF_PROTOCOL)) {
+	USB_LOG_DBG("[+]222%s\r\n", __func__);
             if (index->class == class && index->subclass == subclass && index->protocol == protocol) {
                 return index->class_driver;
             }
         } else if ((index->match_flags & (USB_CLASS_MATCH_VENDOR | USB_CLASS_MATCH_PRODUCT | USB_CLASS_MATCH_INTF_CLASS)) ==
                    (USB_CLASS_MATCH_VENDOR | USB_CLASS_MATCH_PRODUCT | USB_CLASS_MATCH_INTF_CLASS)) {
+	USB_LOG_DBG("[+]333%s\r\n", __func__);
             if (index->vid == vid && index->pid == pid && index->class == class) {
                 return index->class_driver;
             }
         } else if ((index->match_flags & (USB_CLASS_MATCH_INTF_CLASS | USB_CLASS_MATCH_INTF_SUBCLASS)) == 
                    (USB_CLASS_MATCH_INTF_CLASS | USB_CLASS_MATCH_INTF_SUBCLASS)) {
+	USB_LOG_DBG("[+]444%s\r\n", __func__);
             if (index->class == class && index->subclass == subclass) {
                 return index->class_driver;
             }
         } else if (index->match_flags & (USB_CLASS_MATCH_INTF_CLASS)) {
+	USB_LOG_DBG("[+]555%s\r\n", __func__);
             if (index->class == class) {
                 return index->class_driver;
             }
@@ -673,13 +678,36 @@ int usbh_enumerate(struct usbh_hubport *hport)
     for (uint8_t i = 0; i < hport->config.config_desc.bNumInterfaces; i++) {
         intf_desc = &hport->config.intf[i].altsetting[0].intf_desc;
 
+        #if 1
+        // output all intf desc
+        USB_LOG_DBG("\r\n--- intf[%d] start---\r\n", i);
+        USB_LOG_DBG("bDescriptorType:    0x%02x \r\n", intf_desc->bDescriptorType);
+        USB_LOG_DBG("bInterfaceNumber:   0x%02x \r\n", intf_desc->bInterfaceNumber);
+        USB_LOG_DBG("bAlternateSetting:  0x%02x \r\n", intf_desc->bAlternateSetting);
+        USB_LOG_DBG("bNumEndpoints:      0x%02x \r\n", intf_desc->bNumEndpoints);
+        USB_LOG_DBG("bInterfaceClass:    0x%02x \r\n", intf_desc->bInterfaceClass);
+        USB_LOG_DBG("bInterfaceSubClass: 0x%02x \r\n", intf_desc->bInterfaceSubClass);
+        USB_LOG_DBG("bInterfaceProtocol: 0x%02x \r\n", intf_desc->bInterfaceProtocol);
+        USB_LOG_DBG("iInterface:         0x%02x \r\n", intf_desc->iInterface);
+        USB_LOG_DBG("--- intf[%d] end---\r\n\r\n", i);
+        #endif
+
         struct usbh_class_driver *class_driver = (struct usbh_class_driver *)usbh_find_class_driver(intf_desc->bInterfaceClass, intf_desc->bInterfaceSubClass, intf_desc->bInterfaceProtocol, hport->device_desc.idVendor, hport->device_desc.idProduct);
 
+        // if (class_driver && intf_desc->bInterfaceNumber != 0x02) {
+        //     USB_LOG_DBG("----> bInterfaceNumber != 0x02\r\n");
+        //     class_driver = NULL;
+        // } else {
+        //     USB_LOG_DBG("----> bInterfaceNumber == 0x02\r\n");
+        // }
+
         if (class_driver == NULL) {
-            USB_LOG_DBG("do not support Class:0x%02x,Subclass:0x%02x,Protocl:0x%02x\r\n",
+            USB_LOG_DBG("do not support Class:0x%02x,Subclass:0x%02x,Protocl:0x%02x,Interfaces:0x%02x\r\n",
                         intf_desc->bInterfaceClass,
                         intf_desc->bInterfaceSubClass,
-                        intf_desc->bInterfaceProtocol);
+                        intf_desc->bInterfaceProtocol,
+                        intf_desc->bInterfaceNumber
+                    );
 
             continue;
         }

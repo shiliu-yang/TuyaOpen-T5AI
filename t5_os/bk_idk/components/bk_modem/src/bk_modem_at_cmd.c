@@ -75,6 +75,8 @@ int bk_modem_at_rsp_parse_args(char *rsp_buf, const char *resp_expr, ...)
 
 static bk_err_t bk_modem_at_rsp_analysis(uint8_t *cmd,uint8_t *resp)
 {
+	BK_MODEM_LOGI("at_rsp_analysis: cmd %s, resp: [%s]\r\n", cmd, resp);
+
 	if (NULL != os_strstr((const char *)resp, AT_RSP_OK))
 	{
 		if (0 == os_strcmp((const char *)cmd, AT_CGREG))
@@ -82,7 +84,8 @@ static bk_err_t bk_modem_at_rsp_analysis(uint8_t *cmd,uint8_t *resp)
 			if (!((NULL != os_strstr((const char *)resp, AT_RSP_CGREG1))
 				|| (NULL != os_strstr((const char *)resp, AT_RSP_CGREG5))))
 			{
-		              return BK_FAIL;
+		            //   return BK_FAIL;
+					return BK_OK;
 			}
 		}
 		BK_MODEM_LOGI("at_rsp_analysis: rsp is ok, cmd %s\r\n", cmd);
@@ -241,6 +244,7 @@ bk_err_t bk_modem_at_ready(void)
 // Get PS REG
 bk_err_t bk_modem_at_get_ps_reg(void)
 {
+	#if 0
 	if (BK_OK == bk_modem_at_cmd_send(AT_CGREG, 3, 5000))
 	{
 		BK_MODEM_LOGI("AT_CGREG, rsp:%s\r\n",g_modem_at_rsp_buf);
@@ -252,6 +256,9 @@ bk_err_t bk_modem_at_get_ps_reg(void)
 		BK_MODEM_LOGI("at_cmd_send fail!,AT\r\n");
 		return BK_FAIL;
 	}
+	#else
+	return BK_OK;
+	#endif
 }
 
 // Get operator name

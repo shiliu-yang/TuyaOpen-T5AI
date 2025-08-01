@@ -17,6 +17,7 @@
 
 #ifndef CONFIG_USB_DBG_LEVEL
 #define CONFIG_USB_DBG_LEVEL USB_DBG_INFO
+// #define CONFIG_USB_DBG_LEVEL USB_DBG_LOG
 #endif
 
 /* Enable print with color */
@@ -116,10 +117,10 @@
 #define CONFIG_USBHOST_PSC_STACKSIZE 2048
 #endif
 
-//#define CONFIG_USBHOST_GET_STRING_DESC
+// #define CONFIG_USBHOST_GET_STRING_DESC
 
 /* Ep0 max transfer buffer */
-#define CONFIG_USBHOST_REQUEST_BUFFER_LEN 1024//512
+#define CONFIG_USBHOST_REQUEST_BUFFER_LEN 1024 // 512
 
 #ifndef CONFIG_USBHOST_CONTROL_TRANSFER_TIMEOUT
 #define CONFIG_USBHOST_CONTROL_TRANSFER_TIMEOUT 500
@@ -131,9 +132,9 @@
 
 /* ================ USB Device Port Configuration ================*/
 
-//#define USBD_IRQHandler USBD_IRQHandler
-//#define USB_BASE (0x40080000UL)
-//#define USB_NUM_BIDIR_ENDPOINTS 4
+// #define USBD_IRQHandler USBD_IRQHandler
+// #define USB_BASE (0x40080000UL)
+// #define USB_NUM_BIDIR_ENDPOINTS 4
 
 /* ================ USB Host Port Configuration ==================*/
 

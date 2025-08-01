@@ -5,10 +5,10 @@
 #include <common/bk_include.h>
 
 #define BK_MODEM_LOG 				"bkmodem"
-#define BK_MODEM_LOGI(...)			BK_LOGI(BK_MODEM_LOG, ##__VA_ARGS__)
+#define BK_MODEM_LOGI(...)			BK_LOGE(BK_MODEM_LOG, ##__VA_ARGS__)
 #define BK_MODEM_LOGW(...)			BK_LOGW(BK_MODEM_LOG, ##__VA_ARGS__)
 #define BK_MODEM_LOGE(...)			BK_LOGE(BK_MODEM_LOG, ##__VA_ARGS__)
-#define BK_MODEM_LOGD(...)			BK_LOGD(BK_MODEM_LOG, ##__VA_ARGS__)
+#define BK_MODEM_LOGD(...)			BK_LOGE(BK_MODEM_LOG, ##__VA_ARGS__)
 #define BK_MODEM_LOGI_RAW(...)		BK_RAW_LOGI(BK_MODEM_LOG, ##__VA_ARGS__)
 #define BK_MODEM_LOGD_RAW(...)		BK_RAW_LOGD(BK_MODEM_LOG, ##__VA_ARGS__)
 
