@@ -50,6 +50,9 @@ set(incs
     "include/qspi"
     "include/mcu8080"
     "../../t5_os/bk_idk/components/bk_modem/include"
+    "src/system/at_cellular/include"
+    "src/system/at_cellular/include/vendor"
+    "src/system/at_cellular/include/utils"
 )
 
 string(REPLACE " " ";" TUYA_HEADER_DIR_LIST $ENV{TUYA_HEADER_DIR})
@@ -122,6 +125,12 @@ list(APPEND srcs
     src/driver/tkl_asr.c
     src/driver/tkl_rgb.c
     src/driver/tkl_8080.c
+    src/system/at_cellular/src/utils/at_utils.c
+    src/system/at_cellular/src/at_socket.c
+    src/system/at_cellular/src/at_modem.c
+    src/system/at_cellular/src/at_client.c
+    src/system/at_cellular/src/at_parser.c
+    src/system/at_cellular/src/vendor/at_vendor_ml307.c
 )
 
 file(GLOB_RECURSE utilities_srcs "$ENV{ARMINO_PATH}/../../tuyaos/tuyaos_adapter/include/utilities/src/*.c")
