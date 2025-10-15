@@ -53,7 +53,7 @@ OPERATE_RET tkl_gpio_init(TUYA_GPIO_NUM_E pin_id, CONST TUYA_GPIO_BASE_CFG_T *cf
     // TODO
     PIN_DEV_CHECK_ERROR_RETURN(pin_id, OPRT_INVALID_PARM);
     if (pin_id == TUYA_GPIO_NUM_0) {
-        bk_printf("WARNING: Init gpio0, LOG will be disabled\r\n");
+        // bk_printf("WARNING: Init gpio0, LOG will be disabled\r\n");
     }
 
     bk_gpio_driver_init();
@@ -73,7 +73,7 @@ OPERATE_RET tkl_gpio_init(TUYA_GPIO_NUM_E pin_id, CONST TUYA_GPIO_BASE_CFG_T *cf
             } else if(cfg->mode == TUYA_GPIO_FLOATING) {
                 bk_gpio_disable_pull(pinmap[pin_id].gpio);
             } else {
-                bk_printf("set direct error \r\n");
+                // bk_printf("set direct error \r\n");
                 return OPRT_NOT_SUPPORTED;
             }
             break;
@@ -184,9 +184,9 @@ OPERATE_RET tkl_gpio_irq_init(TUYA_GPIO_NUM_E pin_id, CONST TUYA_GPIO_IRQ_T *cfg
 {
     PIN_DEV_CHECK_ERROR_RETURN(pin_id, OPRT_INVALID_PARM);
 
-    if (pin_id == TUYA_GPIO_NUM_0) {
-        bk_printf("WARNING: Init gpio0 irq, LOG will be disabled\r\n");
-    }
+    // if (pin_id == TUYA_GPIO_NUM_0) {
+    //     bk_printf("WARNING: Init gpio0 irq, LOG will be disabled\r\n");
+    // }
 
     gpio_int_type_t trigger;
 
@@ -205,7 +205,7 @@ OPERATE_RET tkl_gpio_irq_init(TUYA_GPIO_NUM_E pin_id, CONST TUYA_GPIO_IRQ_T *cfg
             break;
         case TUYA_GPIO_IRQ_RISE_FALL:
         default:
-            bk_printf("GPIO_INT_TYPE_HIGH_LEVEL Not supported yet !!!\r\n");
+            // bk_printf("GPIO_INT_TYPE_HIGH_LEVEL Not supported yet !!!\r\n");
             return OPRT_NOT_SUPPORTED;
     }
 

@@ -167,6 +167,8 @@ OPERATE_RET tkl_uart_wait_for_data(TUYA_UART_NUM_E port_id, INT_T timeout_ms);
  */
 OPERATE_RET tkl_uart_ioctl(TUYA_UART_NUM_E port_id, UINT32_T cmd, VOID *arg);
 
+uint32_t tkl_uart_get_rxfifo_len(TUYA_UART_NUM_E port_id);
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

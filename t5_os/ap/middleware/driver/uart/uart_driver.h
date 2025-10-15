@@ -15,6 +15,7 @@
 #pragma once
 
 #include <components/log.h>
+#include <driver/hal/hal_uart_types.h>
 
 #define UART_TAG "uart"
 #define UART_LOGI(...) BK_LOGI(UART_TAG, ##__VA_ARGS__)
@@ -23,3 +24,14 @@
 #define UART_LOGD(...) BK_LOGD(UART_TAG, ##__VA_ARGS__)
 #define UART_LOGV(...) BK_LOGV(UART_TAG, ##__VA_ARGS__)
 
+typedef struct {
+    volatile uint32_t uart_err_ore;
+    volatile uint32_t uart_err_fe;
+    volatile uint32_t uart_err_ne;
+    volatile uint32_t uart_err_pe;
+    volatile uint32_t dma_err;
+} uart_err_stat_t;
+
+const uart_err_stat_t* bk_uart_get_error_stat(uart_id_t id);
+
+void bk_uart_reset_error_stat(uart_id_t id);

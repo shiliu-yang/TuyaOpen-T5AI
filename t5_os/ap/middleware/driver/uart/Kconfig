@@ -66,7 +66,7 @@ menu "UART"
 
 	config UART_RX_DMA_KFIFO_SIZE
 		int "Kfifo Size"
-		range 1 4096
+		range 1 65536
 		default 512
 		help
 			This will reset kfifo size of "CONFIG_KFIFO_SIZE" when software enable rx dma.

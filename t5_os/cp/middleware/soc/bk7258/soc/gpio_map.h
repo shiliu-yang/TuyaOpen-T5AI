@@ -126,8 +126,8 @@ extern "C" {
 #define UART1_TX_PIN  GPIO_0
 #define UART1_RX_PIN  GPIO_1
 
-#define UART2_TX_PIN  GPIO_31
-#define UART2_RX_PIN  GPIO_30
+#define UART2_TX_PIN  GPIO_41
+#define UART2_RX_PIN  GPIO_40
 
 /* sdio host */
 #if CONFIG_SDCARD_BUSWIDTH_4LINE
