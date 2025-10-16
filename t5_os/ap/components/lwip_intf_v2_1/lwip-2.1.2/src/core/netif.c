@@ -1820,3 +1820,29 @@ netif_invoke_ext_callback(struct netif *netif, netif_nsc_reason_t reason, const 
   }
 }
 #endif /* LWIP_NETIF_EXT_STATUS_CALLBACK */
+
+#ifdef CONFIG_LWIP_PPP_SUPPORT
+/**
+* @ingroup netif
+* Return the interface for the netif IP address
+*
+* @param addr IP address of netif to find
+*/
+struct netif *
+netif_get_by_ipaddr(ip_addr_t ip)
+{
+  struct netif *netif;
+
+  LWIP_ASSERT_CORE_LOCKED();
+
+  if (ip.addr) {
+    NETIF_FOREACH(netif) {
+      if (netif_is_link_up(netif) && netif_is_up(netif) && (netif->ip_addr.addr == ip.addr)) {
+        return netif;
+      }
+    }
+  }
+
+  return NULL;
+}
+#endif

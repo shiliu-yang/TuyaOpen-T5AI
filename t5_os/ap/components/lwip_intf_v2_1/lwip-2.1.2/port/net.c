@@ -1006,9 +1006,17 @@ void net_configure_dns(struct iface *if_handle, struct wlan_ip_config *ip)
 			ip->ipv4.dns2 = ip->ipv4.dns1;
 
 		ip_addr_set_ip4_u32(&tmp, ip->ipv4.dns1);
+#ifdef CONFIG_LWIP_PPP_SUPPORT
+		dns_setserver(0, &tmp, &if_handle->netif);
+#else
 		dns_setserver(0, &tmp);
+#endif		
 		ip_addr_set_ip4_u32(&tmp, ip->ipv4.dns2);
+#ifdef CONFIG_LWIP_PPP_SUPPORT
+		dns_setserver(1, &tmp, &if_handle->netif);
+#else		
 		dns_setserver(1, &tmp);
+#endif		
 	}
 
 	/* DNS MAX Retries should be configured in lwip/dns.c to 3/4 */
@@ -1028,7 +1036,6 @@ void net_wlan_initial(void)
 #endif
 }
 
-#if !CONFIG_WIFI_VNET_CONTROLLER
 int net_wlan_add_netif(uint8_t *mac)
 {
 	struct iface *wlan_if = NULL;
@@ -1105,8 +1112,24 @@ int net_wlan_remove_netif(uint8_t *mac)
 	LWIP_LOGD("remove vif%d\n", vifid);
 	return ERR_OK;
 }
-#endif
-
+void bk_netif_add_dns_server(uint8_t idx, const char* szIpv4)
+{
+    ip_addr_t ipaddr;
+    ipaddr_aton(szIpv4, &ipaddr);
+    if (ipaddr_aton(szIpv4, &ipaddr))
+    {
+        LWIP_LOGI("idx:(%d)dns:(%s)",idx,szIpv4);
+#ifdef CONFIG_LWIP_PPP_SUPPORT
+		dns_setserver(idx, &ipaddr, NULL);
+#else
+        dns_setserver(idx, &ipaddr);
+#endif		
+    }
+    else
+    {
+        LWIP_LOGI("idx:(%d)dns:(%s)",idx,szIpv4);
+    }
+}
 #if CONFIG_WIFI6_CODE_STACK
 bool etharp_tmr_flag = false;
 void net_begin_send_arp_reply(bool is_send_arp, bool is_allow_send_req)
