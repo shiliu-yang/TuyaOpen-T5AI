@@ -471,8 +471,32 @@ static void wdrv_handle_cli_commmand(char *pcWriteBuffer, int xWriteBufferLen, i
     }
 }
 
+
+extern void bno08x_set_yaw_degree(int yaw_degree);
+extern void bno08x_refresh_ui(void);
+
+static void cli_app_bno085(char *pcWriteBuffer, int xWriteBufferLen, int argc, char **argv)
+{
+    if (argc == 1) {
+        bk_printf("no parameter\r\n");
+        return;
+    }
+
+    for (int i = 0; i < argc; i++) {
+        bk_printf("argv[%d]: %s\r\n", i, argv[i]);
+    }
+
+    int yaw = atoi(argv[1]);
+
+    bno08x_set_yaw_degree(yaw);
+    bno08x_refresh_ui();
+
+    return;
+}
+
 static const struct cli_command s_wdrv_commands[] = {
     {"wdrv", "wdrv", wdrv_handle_cli_commmand},
+    {"xapp_bno085", "xapp_bno085 {yaw}", cli_app_bno085},
 };
 
 int wdrv_cli_init(void)
