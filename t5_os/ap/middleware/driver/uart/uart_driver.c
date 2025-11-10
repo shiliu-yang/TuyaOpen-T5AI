@@ -45,6 +45,25 @@
 static void uart_isr_common(uart_id_t id) __BK_SECTION(".itcm");
 static uint32_t uart_id_read_fifo_frame(uart_id_t id, const kfifo_ptr_t rx_ptr) __BK_SECTION(".itcm");
 
+#if (CONFIG_UART_RX_DMA || CONFIG_UART_TX_DMA)
+static uart_err_stat_t s_uart_err[UART_ID_MAX];
+
+const uart_err_stat_t* bk_uart_get_error_stat(uart_id_t id)
+{
+    if (id >= UART_ID_MAX) return NULL;
+    return &s_uart_err[id];
+}
+
+void bk_uart_reset_error_stat(uart_id_t id)
+{
+    if (id >= UART_ID_MAX) return;
+    GLOBAL_INT_DECLARATION();
+    GLOBAL_INT_DISABLE();
+    os_memset((void*)&s_uart_err[id], 0, sizeof(uart_err_stat_t));
+    GLOBAL_INT_RESTORE();
+}
+#endif
+
 typedef struct {
 	uart_hal_t hal;
 	uint8_t id_init_bits;
@@ -497,7 +516,19 @@ static uint32_t uart_id_dma_read_fifo_frame(uart_id_t id, const kfifo_ptr_t rx_p
 	if(actual_trans_len > s_uart_rx_kfifo[id]->size)
 	{
 		//TODO:
-		BK_ASSERT(0);
+		UART_LOGW("uart(%d) dma over-wrap: len=%u > fifo=%u\r\n",
+				id, actual_trans_len, s_uart_rx_kfifo[id]->size);
+
+		#if CONFIG_DEBUG_VERSION
+			// BK_ASSERT(0);
+		#endif
+
+		actual_trans_len = s_uart_rx_kfifo[id]->size;
+
+		rx_ptr->in += actual_trans_len;
+		rx_ptr->in &= rx_ptr->mask;
+
+		rx_ptr->out = (rx_ptr->in - rx_ptr->size);
 	}
 	else
 	{
@@ -1401,7 +1432,7 @@ bk_err_t bk_uart_read_bytes(uart_id_t id, void *data, uint32_t size, uint32_t ti
 				GLOBAL_INT_DISABLE();
 				s_uart_sema[id].rx_blocked = false;
 				GLOBAL_INT_RESTORE();
-				UART_LOGW("recv data timeout:%d\n", timeout_ms);
+				// UART_LOGW("recv data timeout:%d\n", timeout_ms);
 				UART_STATIS_INC(uart_statis->recv_timeout_cnt);
 				return BK_ERR_UART_RX_TIMEOUT;
 			}
@@ -1621,6 +1652,15 @@ static void uart_isr_common(uart_id_t id)
 	uart_hal_clear_interrupt_status(&s_uart[id].hal, id, int_status);
 	UART_STATIS_GET(uart_statis, id);
 	UART_STATIS_INC(uart_statis->uart_isr_cnt);
+
+#if (CONFIG_UART_RX_DMA || CONFIG_UART_TX_DMA)
+	if (int_status & BIT(2))
+		s_uart_err[id].uart_err_ore++; // overflow
+	if (int_status & BIT(3))
+		s_uart_err[id].uart_err_pe++;  // parity
+	if (int_status & BIT(4))
+		s_uart_err[id].uart_err_fe++;  // stop bit / framing
+#endif
 
 	if (uart_hal_is_rx_interrupt_triggered(&s_uart[id].hal, id, status))	//rx end or rx fifo full
 	{

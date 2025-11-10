@@ -89,8 +89,21 @@ OPERATE_RET tkl_uart_init(TUYA_UART_NUM_E port_id, TUYA_UART_BASE_CFG_T *cfg)
     bkcfg.src_clk   = UART_SCLK_XTAL_26M;
 
     //bk_printf("tkl_uart_init, port: %d, baudrate %d\r\n", port_num, cfg->baudrate);
+    // for uart2 dma
+    if (port == UART_ID_2) {
+        //  DMA
+        bkcfg.rx_dma_en = 1;
+        // bkcfg.tx_dma_en = 1;
+    }
 
     bk_uart_init(port, &bkcfg);
+
+    // for uart2 dma
+    if (port == UART_ID_2) {
+        bk_uart_enable_rx_interrupt(port);
+        bk_uart_set_baud_rate(port, bkcfg.baud_rate);
+        bk_uart_reset_error_stat(port);
+    }
 
     return OPRT_OK;
 }
@@ -298,4 +311,23 @@ VOID_T tkl_uart_rx_irq_cb_reg(TUYA_UART_NUM_E port_id, TUYA_UART_IRQ_CB rx_cb)
 VOID_T tkl_uart_tx_irq_cb_reg(TUYA_UART_NUM_E port_id, TUYA_UART_IRQ_CB tx_cb)
 {
 
+}
+
+uint32_t tkl_uart_get_rxfifo_len(TUYA_UART_NUM_E port_id)
+{
+    int port_num = TUYA_UART_GET_PORT_NUMBER(port_id);
+    uart_id_t port;
+
+    if (0 == port_num) {
+        port = UART_ID_0;
+    } else if (1 == port_num) {
+        port = UART_ID_1;
+    } else if (2 == port_num) {
+        port = UART_ID_2;
+    } else {
+        return 0;
+    }
+
+    // return bk_uart_get_rxfifo_len(port);
+    return uart_get_length_in_buffer(port);
 }
